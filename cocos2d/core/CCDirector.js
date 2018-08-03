@@ -33,7 +33,25 @@ var EventListeners = require('./event/event-listeners');
 var eventManager = require('./event-manager');
 
 cc.g_NumberOfDraws = 0;
-
+cc.g_tc = 0;
+cc.gg_frame = 0;
+cc.gg_allcmds = [];
+cc.gg_fps = 0;
+cc.gg_fps_time = 0;
+cc.gg_transform_time = 0;
+cc.gg_render_time = 0;
+cc.gg_totaltime = 0;
+cc.gg_time_seg1 = 0;
+cc.gg_time_seg2 = 0;
+cc.gg_time_seg3 = 0;
+cc.gg_time_seg4 = 0;
+cc.gg_time_seg5 = 0;
+cc.gg_time_seg6 = 0;
+cc.gg_time_seg7 = 0;
+cc.gg_time_seg8 = 0;
+cc.gg_time_seg9 = 0;
+cc.gg_time_seg10 = 0;
+cc.gg_update_times = [];
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -262,7 +280,7 @@ cc.Director = Class.extend(/** @lends cc.Director# */{
         var top = box.top + window.pageYOffset - container.clientTop;
         var x = view._devicePixelRatio * (uiPoint.x - left);
         var y = view._devicePixelRatio * (top + box.height - uiPoint.y);
-        return view._isRotated ? {x: view._viewPortRect.width - y, y: x} : {x: x, y: y};
+        return view._isRotated ? { x: view._viewPortRect.width - y, y: x } : { x: x, y: y };
     },
 
     /**
@@ -281,7 +299,7 @@ cc.Director = Class.extend(/** @lends cc.Director# */{
         var box = container.getBoundingClientRect();
         var left = box.left + window.pageXOffset - container.clientLeft;
         var top = box.top + window.pageYOffset - container.clientTop;
-        var uiPoint = {x: 0, y: 0};
+        var uiPoint = { x: 0, y: 0 };
         if (view._isRotated) {
             uiPoint.x = left + glPoint.y / view._devicePixelRatio;
             uiPoint.y = top + box.height - (view._viewPortRect.width - glPoint.x) / view._devicePixelRatio;
@@ -297,6 +315,7 @@ cc.Director = Class.extend(/** @lends cc.Director# */{
         if (this._runningScene) {
             var renderer = cc.renderer;
             if (renderer.childrenOrderDirty) {
+                //console.log('renderer.childrenOrderDirty = true');
                 // update the whole scene
                 renderer.clearRenderCommands();
                 cc.renderer.assignedZ = 0;
@@ -486,7 +505,7 @@ cc.Director = Class.extend(/** @lends cc.Director# */{
             eventManager.setEnabled(true);
 
         // Action manager
-        if (this._actionManager){
+        if (this._actionManager) {
             this._scheduler.scheduleUpdate(this._actionManager, cc.Scheduler.PRIORITY_SYSTEM, false);
         }
 
@@ -617,7 +636,7 @@ cc.Director = Class.extend(/** @lends cc.Director# */{
         }
 
         // Run or replace rendering scene
-        if ( !this._runningScene ) {
+        if (!this._runningScene) {
             //start scene
             this.pushScene(sgScene);
             this.startAnimation();
@@ -1440,6 +1459,9 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
 
             this.emit(cc.Director.EVENT_AFTER_UPDATE);
         }
+        cc.g_tc = 0;
+        cc.gg_frame++;
+        cc.gg_allcmds.length = 0;
 
         this.emit(cc.Director.EVENT_BEFORE_VISIT);
         // update the scene
@@ -1456,6 +1478,9 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
         this.emit(cc.Director.EVENT_AFTER_DRAW);
 
     } : function () {
+        // cc.gg_update_times.length = 0;
+        // var t = Date.now();
+        // var t1;
         if (this._purgeDirectorInNextLoop) {
             this._purgeDirectorInNextLoop = false;
             this.purgeDirector();
@@ -1464,20 +1489,35 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
             // calculate "global" dt
             this.calculateDeltaTime();
 
+            // t1 = Date.now();
             if (!this._paused) {
                 this.emit(cc.Director.EVENT_BEFORE_UPDATE);
+                // cc.gg_time_seg1 = Date.now() - t1;
+                // t1 = Date.now();
                 // Call start for new added components
                 this._compScheduler.startPhase();
+                // cc.gg_time_seg2 = Date.now() - t1;
+                // t1 = Date.now();
                 // Update for components
                 this._compScheduler.updatePhase(this._deltaTime);
+                // cc.gg_time_seg3 = Date.now() - t1;
+                // t1 = Date.now();
                 // Engine update with scheduler
                 this._scheduler.update(this._deltaTime);
+                // cc.gg_time_seg4 = Date.now() - t1;
+                // t1 = Date.now();
                 // Late update for components
                 this._compScheduler.lateUpdatePhase(this._deltaTime);
+                // cc.gg_time_seg5 = Date.now() - t1;
+                // t1 = Date.now();
                 // User can use this event to do things after update
                 this.emit(cc.Director.EVENT_AFTER_UPDATE);
+                // cc.gg_time_seg6 = Date.now() - t1;
+                // t1 = Date.now();
                 // Destroy entities that have been removed recently
                 cc.Object._deferredDestroy();
+                // cc.gg_time_seg7 = Date.now() - t1;
+                // t1 = Date.now();
             }
 
             /* to avoid flickr, nextScene MUST be here: after tick and before draw.
@@ -1486,11 +1526,26 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
                 this.setNextScene();
             }
 
+            // t1 = Date.now();
+
+            // 自己录制fps
+            // cc.gg_fps++;
+            // if (cc.gg_fps_time < Date.now()) {
+            //     cc.gg_fps = 0;
+            //     cc.gg_fps_time = Date.now() + 1000;
+            // }
+
+            cc.gg_frame++;
+            cc.gg_allcmds.length = 0;
+            cc.g_tc = 0;
             this.emit(cc.Director.EVENT_BEFORE_VISIT);
             // update the scene
             this._visitScene();
             this.emit(cc.Director.EVENT_AFTER_VISIT);
 
+            // cc.gg_time_seg8 = Date.now() - t1;
+
+            // t1 = Date.now();
             // Render
             cc.g_NumberOfDraws = 0;
             cc.renderer.clear();
@@ -1500,7 +1555,9 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
 
             this.emit(cc.Director.EVENT_AFTER_DRAW);
             eventManager.frameUpdateListeners();
+            // cc.gg_time_seg9 = Date.now() - t1;
         }
+        // cc.gg_totaltime = Date.now() - t;
     },
 
     /**

@@ -28,7 +28,7 @@ var Misc = require('../utils/misc');
 var eventManager = require('../event-manager');
 
 var ActionManagerExist = !!cc.ActionManager;
-var emptyFunc = function () {};
+var emptyFunc = function () { };
 
 /*
  * XXX: Yes, nodes might have a sort problem once every 15 days if the game runs at 60 FPS and each frame sprites are reordered.
@@ -162,12 +162,14 @@ _ccsg.Node = cc.Class({
         _cascadeOpacityEnabled: false,
         _isTransitionFinished: false,
 
+        renderLayer: 0,
+
         _actionManager: null,
         _scheduler: null,
         _renderCmd: null
     },
 
-    ctor: function() {
+    ctor: function () {
         this.__instanceId = cc.ClassManager.getNewInstanceId();
         this._renderCmd = this._createRenderCmd();
     },
@@ -541,12 +543,12 @@ _ccsg.Node = cc.Class({
     setPosition: function (newPosOrxValue, yValue) {
         var locPosition = this._position;
         if (yValue === undefined) {
-            if(locPosition.x === newPosOrxValue.x && locPosition.y === newPosOrxValue.y)
+            if (locPosition.x === newPosOrxValue.x && locPosition.y === newPosOrxValue.y)
                 return;
             locPosition.x = newPosOrxValue.x;
             locPosition.y = newPosOrxValue.y;
         } else {
-            if(locPosition.x === newPosOrxValue && locPosition.y === yValue)
+            if (locPosition.x === newPosOrxValue && locPosition.y === yValue)
                 return;
             locPosition.x = newPosOrxValue;
             locPosition.y = yValue;
@@ -588,7 +590,7 @@ _ccsg.Node = cc.Class({
      * @return {Number}
      */
     getPositionY: function () {
-        return  this._position.y;
+        return this._position.y;
     },
 
     /**
@@ -880,8 +882,8 @@ _ccsg.Node = cc.Class({
      * @function
      * @param {String} name
      */
-    setName: function(name){
-         this._name = name;
+    setName: function (name) {
+        this._name = name;
     },
 
     /**
@@ -889,7 +891,7 @@ _ccsg.Node = cc.Class({
      * @function
      * @returns {string} A string that identifies the node.
      */
-    getName: function(){
+    getName: function () {
         return this._name;
     },
 
@@ -939,7 +941,7 @@ _ccsg.Node = cc.Class({
      * @deprecated since v3.0, please use getBoundingBox instead
      * @return {Rect}
      */
-    boundingBox: function(){
+    boundingBox: function () {
         cc.logID(1608);
         return this.getBoundingBox();
     },
@@ -1036,12 +1038,12 @@ _ccsg.Node = cc.Class({
         this._addChildHelper(child, localZOrder, tag, name, setTag);
     },
 
-    _addChildHelper: function(child, localZOrder, tag, name, setTag){
-        if(!this._children)
+    _addChildHelper: function (child, localZOrder, tag, name, setTag) {
+        if (!this._children)
             this._children = [];
 
         this._insertChild(child, localZOrder);
-        if(setTag)
+        if (setTag)
             child.setTag(tag);
         else
             child.setName(name);
@@ -1327,48 +1329,48 @@ _ccsg.Node = cc.Class({
         }
         // Perform actual action
         switch (callbackType) {
-        case nodeCallbackType.onEnter:
-            for (i = stack.length - 1; i >= 0; --i) {
-                curr = stack[i];
-                stack[i] = null;
-                if (!curr) continue;
-                curr.onEnter();
-            }
-            break;
-        case nodeCallbackType.onExit:
-            for (i = stack.length - 1; i >= 0; --i) {
-                curr = stack[i];
-                stack[i] = null;
-                if (!curr) continue;
-                curr.onExit();
-            }
-            break;
-        case nodeCallbackType.onEnterTransitionDidFinish:
-            for (i = stack.length - 1; i >= 0; --i) {
-                curr = stack[i];
-                stack[i] = null;
-                if (!curr) continue;
-                curr.onEnterTransitionDidFinish();
-            }
-            break;
-        case nodeCallbackType.cleanup:
-            for (i = stack.length - 1; i >= 0; --i) {
-                curr = stack[i];
-                stack[i] = null;
-                if (!curr) continue;
-                curr.cleanup();
-            }
-            break;
-        case nodeCallbackType.onExitTransitionDidStart:
-            for (i = stack.length - 1; i >= 0; --i) {
-                curr = stack[i];
-                stack[i] = null;
-                if (!curr) continue;
-                curr.onExitTransitionDidStart();
-            }
-            break;
+            case nodeCallbackType.onEnter:
+                for (i = stack.length - 1; i >= 0; --i) {
+                    curr = stack[i];
+                    stack[i] = null;
+                    if (!curr) continue;
+                    curr.onEnter();
+                }
+                break;
+            case nodeCallbackType.onExit:
+                for (i = stack.length - 1; i >= 0; --i) {
+                    curr = stack[i];
+                    stack[i] = null;
+                    if (!curr) continue;
+                    curr.onExit();
+                }
+                break;
+            case nodeCallbackType.onEnterTransitionDidFinish:
+                for (i = stack.length - 1; i >= 0; --i) {
+                    curr = stack[i];
+                    stack[i] = null;
+                    if (!curr) continue;
+                    curr.onEnterTransitionDidFinish();
+                }
+                break;
+            case nodeCallbackType.cleanup:
+                for (i = stack.length - 1; i >= 0; --i) {
+                    curr = stack[i];
+                    stack[i] = null;
+                    if (!curr) continue;
+                    curr.cleanup();
+                }
+                break;
+            case nodeCallbackType.onExitTransitionDidStart:
+                for (i = stack.length - 1; i >= 0; --i) {
+                    curr = stack[i];
+                    stack[i] = null;
+                    if (!curr) continue;
+                    curr.onExitTransitionDidStart();
+                }
+                break;
         }
-        
+
         _ccsg.Node._performing--;
     },
 
@@ -1862,6 +1864,10 @@ _ccsg.Node = cc.Class({
             return;
         }
 
+        if (this.renderLayer) {
+            // console.log("111 push render command.", this.renderLayer);
+        }
+
         var renderer = cc.renderer;
         cmd.visit(parentCmd);
 
@@ -1881,12 +1887,16 @@ _ccsg.Node = cc.Class({
                 }
             }
 
-            renderer.pushRenderCommand(cmd);
+            renderer.pushRenderCommand(cmd, this.renderLayer);
             for (; i < len; i++) {
                 children[i].visit(this);
             }
         } else {
-            renderer.pushRenderCommand(cmd);
+            if (parent && parent.renderLayer && parent.renderLayer > 0) {
+                renderer.pushRenderCommand(cmd, parent.renderLayer);
+            } else {
+                renderer.pushRenderCommand(cmd, this.renderLayer);
+            }
         }
         cmd._dirtyFlag = 0;
     },
@@ -1897,7 +1907,7 @@ _ccsg.Node = cc.Class({
      * @param {_ccsg.Node.RenderCmd} parentCmd parent's render command
      * @param {boolean} recursive whether call its children's transform
      */
-    transform: function(parentCmd, recursive){
+    transform: function (parentCmd, recursive) {
         this._renderCmd.transform(parentCmd, recursive);
     },
 
@@ -1908,7 +1918,7 @@ _ccsg.Node = cc.Class({
      * @return {cc.AffineTransform}
      * @deprecated since v3.0, please use getNodeToParentTransform instead
      */
-    nodeToParentTransform: function(){
+    nodeToParentTransform: function () {
         return this.getNodeToParentTransform();
     },
 
@@ -1918,20 +1928,20 @@ _ccsg.Node = cc.Class({
      * @function
      * @return {cc.AffineTransform} The affine transform object
      */
-    getNodeToParentTransform: function(ancestor){
+    getNodeToParentTransform: function (ancestor) {
         var t = this._renderCmd.getNodeToParentTransform();
-        if(ancestor){
-            var T = {a: t.a, b: t.b, c: t.c, d: t.d, tx: t.tx, ty: t.ty};
-            for(var p = this._parent;  p != null && p != ancestor ; p = p.getParent()){
+        if (ancestor) {
+            var T = { a: t.a, b: t.b, c: t.c, d: t.d, tx: t.tx, ty: t.ty };
+            for (var p = this._parent; p != null && p != ancestor; p = p.getParent()) {
                 cc.affineTransformConcatIn(T, p.getNodeToParentTransform());
             }
             return T;
-        }else{
+        } else {
             return t;
         }
     },
 
-    getNodeToParentAffineTransform: function(ancestor){
+    getNodeToParentAffineTransform: function (ancestor) {
         return this.getNodeToParentTransform(ancestor);
     },
 
@@ -2195,7 +2205,7 @@ _ccsg.Node._performing = 0;
 
 
 var SameNameGetSets = ['skewX', 'skewY', 'vertexZ', 'rotation', 'rotationX', 'rotationY', 'scale', 'scaleX', 'scaleY',
-                       'children', 'childrenCount', 'parent', 'scheduler', 'shaderProgram', 'opacity', 'color'];
+    'children', 'childrenCount', 'parent', 'scheduler', 'shaderProgram', 'opacity', 'color'];
 var DiffNameGetSets = {
     x: ['getPositionX', 'setPositionX'],
     y: ['getPositionY', 'setPositionY'],

@@ -43,18 +43,20 @@ var callStart = CC_SUPPORT_JIT ? 'c.start();c._objFlags|=' + IsStartCalled : fun
     c._objFlags |= IsStartCalled;
 };
 var callUpdate = CC_SUPPORT_JIT ? 'c.update(dt)' : function (c, dt) {
+    // var t = Date.now()
     c.update(dt);
+    // cc.gg_update_times.push({ n: c.name, t: Date.now() - t });
 };
 var callLateUpdate = CC_SUPPORT_JIT ? 'c.lateUpdate(dt)' : function (c, dt) {
     c.lateUpdate(dt);
 };
 
-function sortedIndex (array, comp) {
+function sortedIndex(array, comp) {
     var order = comp.constructor._executionOrder;
     var id = comp.__instanceId;
     for (var l = 0, h = array.length - 1, m = h >>> 1;
-         l <= h;
-         m = (l + h) >>> 1
+        l <= h;
+        m = (l + h) >>> 1
     ) {
         var test = array[m];
         var testOrder = test.constructor._executionOrder;
@@ -81,7 +83,7 @@ function sortedIndex (array, comp) {
 }
 
 // remove disabled and not invoked component from array
-function stableRemoveInactive (iterator, flagToClear) {
+function stableRemoveInactive(iterator, flagToClear) {
     var array = iterator.array;
     var next = iterator.i + 1;
     while (next < array.length) {
@@ -100,7 +102,7 @@ function stableRemoveInactive (iterator, flagToClear) {
 
 // This class contains some queues used to invoke life-cycle methods by script execution order
 var LifeCycleInvoker = cc.Class({
-    __ctor__ (invokeFunc) {
+    __ctor__(invokeFunc) {
         var Iterator = JsArray.MutableForwardIterator;
         // components which priority === 0 (default)
         this._zero = new Iterator([]);
@@ -122,27 +124,27 @@ var LifeCycleInvoker = cc.Class({
     invoke: null,
 });
 
-function compareOrder (a, b) {
+function compareOrder(a, b) {
     return a.constructor._executionOrder - b.constructor._executionOrder;
 }
 
 // for onLoad: sort once all components registered, invoke once
 var OneOffInvoker = cc.Class({
     extends: LifeCycleInvoker,
-    add (comp) {
+    add(comp) {
         var order = comp.constructor._executionOrder;
         (order === 0 ? this._zero : (order < 0 ? this._neg : this._pos)).array.push(comp);
     },
-    remove (comp) {
+    remove(comp) {
         var order = comp.constructor._executionOrder;
         (order === 0 ? this._zero : (order < 0 ? this._neg : this._pos)).fastRemove(comp);
     },
-    cancelInactive (flagToClear) {
+    cancelInactive(flagToClear) {
         stableRemoveInactive(this._zero, flagToClear);
         stableRemoveInactive(this._neg, flagToClear);
         stableRemoveInactive(this._pos, flagToClear);
     },
-    invoke () {
+    invoke() {
         var compsNeg = this._neg;
         if (compsNeg.array.length > 0) {
             compsNeg.array.sort(compareOrder);
@@ -165,7 +167,7 @@ var OneOffInvoker = cc.Class({
 // for update: sort every time new component registered, invoke many times
 var ReusableInvoker = cc.Class({
     extends: LifeCycleInvoker,
-    add (comp) {
+    add(comp) {
         var order = comp.constructor._executionOrder;
         if (order === 0) {
             this._zero.array.push(comp);
@@ -181,7 +183,7 @@ var ReusableInvoker = cc.Class({
             }
         }
     },
-    remove (comp) {
+    remove(comp) {
         var order = comp.constructor._executionOrder;
         if (order === 0) {
             this._zero.fastRemove(comp);
@@ -194,7 +196,7 @@ var ReusableInvoker = cc.Class({
             }
         }
     },
-    invoke (dt) {
+    invoke(dt) {
         if (this._neg.array.length > 0) {
             this._invoke(this._neg, dt);
         }
@@ -207,14 +209,14 @@ var ReusableInvoker = cc.Class({
     },
 });
 
-function enableInEditor (comp) {
+function enableInEditor(comp) {
     if (!(comp._objFlags & IsEditorOnEnableCalled)) {
         cc.engine.emit('component-enabled', comp.uuid);
         comp._objFlags |= IsEditorOnEnableCalled;
     }
 }
 
-function createInvokeImpl (funcOrCode, useDt) {
+function createInvokeImpl(funcOrCode, useDt) {
     if (typeof funcOrCode === 'function') {
         if (useDt) {
             return function (iterator, dt) {
@@ -244,10 +246,10 @@ function createInvokeImpl (funcOrCode, useDt) {
         //     }
         // }
         var body = 'var a=it.array;' +
-                   'for(it.i=0;it.i<a.length;++it.i){' +
-                   'var c=a[it.i];' +
-                   funcOrCode +
-                   '}';
+            'for(it.i=0;it.i<a.length;++it.i){' +
+            'var c=a[it.i];' +
+            funcOrCode +
+            '}';
         if (useDt) {
             return Function('it', 'dt', body);
         }
@@ -261,7 +263,7 @@ function createInvokeImpl (funcOrCode, useDt) {
 /**
  * The Manager for Component's life-cycle methods.
  */
-function ctor () {
+function ctor() {
     // invokers
     this.startInvoker = new OneOffInvoker(createInvokeImpl(
         CC_EDITOR ? callStartInTryCatch : callStart));
@@ -313,7 +315,7 @@ var ComponentScheduler = cc.Class({
         }
     },
 
-    _onEnabled (comp) {
+    _onEnabled(comp) {
         cc.director.getScheduler().resumeTarget(comp);
         comp._objFlags |= IsOnEnableCalled;
 
@@ -326,7 +328,7 @@ var ComponentScheduler = cc.Class({
         }
     },
 
-    _onDisabled (comp) {
+    _onDisabled(comp) {
         cc.director.getScheduler().pauseTarget(comp);
         comp._objFlags &= ~IsOnEnableCalled;
 
@@ -413,7 +415,7 @@ var ComponentScheduler = cc.Class({
         }
     },
 
-    _scheduleImmediate (comp) {
+    _scheduleImmediate(comp) {
         if (comp.start && !(comp._objFlags & IsStartCalled)) {
             this.startInvoker.add(comp);
         }
@@ -425,7 +427,7 @@ var ComponentScheduler = cc.Class({
         }
     },
 
-    _deferredSchedule () {
+    _deferredSchedule() {
         var comps = this.scheduleInNextFrame;
         for (var i = 0, len = comps.length; i < len; i++) {
             var comp = comps[i];
@@ -434,7 +436,7 @@ var ComponentScheduler = cc.Class({
         comps.length = 0;
     },
 
-    startPhase () {
+    startPhase() {
         // Start of this frame
         this._updating = true;
 
@@ -461,11 +463,11 @@ var ComponentScheduler = cc.Class({
         // }
     },
 
-    updatePhase (dt) {
+    updatePhase(dt) {
         this.updateInvoker.invoke(dt);
     },
 
-    lateUpdatePhase (dt) {
+    lateUpdatePhase(dt) {
         this.lateUpdateInvoker.invoke(dt);
 
         // End of this frame

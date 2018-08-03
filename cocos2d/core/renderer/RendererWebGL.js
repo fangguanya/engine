@@ -24,17 +24,17 @@
 
 // Internal variables
 
-    // Batching general informations
+// Batching general informations
 var _batchedInfo = {
-        // The batched texture, all batching element should have the same texture
-        texture: null,
-        // The batched blend source, all batching element should have the same blend source
-        blendSrc: null,
-        // The batched blend destination, all batching element should have the same blend destination
-        blendDst: null,
-        // The batched shader, all batching element should have the same shader
-        shader: null
-    },
+    // The batched texture, all batching element should have the same texture
+    texture: null,
+    // The batched blend source, all batching element should have the same blend source
+    blendSrc: null,
+    // The batched blend destination, all batching element should have the same blend destination
+    blendDst: null,
+    // The batched shader, all batching element should have the same shader
+    shader: null
+},
 
     _batchBroken = false,
     _indexBuffer = null,
@@ -60,7 +60,7 @@ var _batchedInfo = {
 
 // Inspired from @Heishe's gotta-batch-them-all branch
 // https://github.com/Talisca/cocos2d-html5/commit/de731f16414eb9bcaa20480006897ca6576d362c
-function updateBuffer (numVertex) {
+function updateBuffer(numVertex) {
     var gl = cc._renderContext;
     // Update index buffer size
     if (_indexBuffer) {
@@ -96,7 +96,7 @@ function updateBuffer (numVertex) {
 
 // Inspired from @Heishe's gotta-batch-them-all branch
 // https://github.com/Talisca/cocos2d-html5/commit/de731f16414eb9bcaa20480006897ca6576d362c
-function initQuadBuffer (numVertex) {
+function initQuadBuffer(numVertex) {
     var gl = cc._renderContext;
     if (_indexBuffer === null) {
         // TODO do user need to release the memory ?
@@ -107,8 +107,8 @@ function initQuadBuffer (numVertex) {
 }
 
 var VertexType = cc.Enum({
-    QUAD : 0,
-    TRIANGLE : 1,
+    QUAD: 0,
+    TRIANGLE: 1,
     CUSTOM: 2
 });
 
@@ -117,18 +117,20 @@ cc.rendererWebGL = {
 
     childrenOrderDirty: true,
     assignedZ: 0,
-    assignedZStep: 1/100,
+    assignedZStep: 1 / 100,
 
     VertexType: VertexType,
 
     _transformNodePool: [],                              //save nodes transform dirty
     _renderCmds: [],                                     //save renderer commands
 
+    _layerRenderCmds: {},
+
     _isCacheToBufferOn: false,                          //a switch that whether cache the rendererCmd to cacheToCanvasCmds
     _cacheToBufferCmds: {},                              // an array saves the renderer commands need for cache to other canvas
     _cacheInstanceIds: [],
     _currentID: 0,
-    _clearColor: {r: 0, g: 0, b: 0, a: 1},              //background color,default BLACK
+    _clearColor: { r: 0, g: 0, b: 0, a: 1 },              //background color,default BLACK
 
     init: function () {
         var gl = cc._renderContext;
@@ -150,7 +152,7 @@ cc.rendererWebGL = {
         this._extensions = this._extensions || {};
         for (var i = 0; i < extensions.length; ++i) {
             var name = extensions[i];
-      
+
             try {
                 var ext = gl.getExtension(name);
                 if (ext) {
@@ -230,6 +232,7 @@ cc.rendererWebGL = {
 
     //update the transform data
     transform: function () {
+        // var t = Date.now();
         var locPool = this._transformNodePool;
         //sort the pool
         locPool.sort(this._sortNodeByLevelAsc);
@@ -240,6 +243,8 @@ cc.rendererWebGL = {
             cmd.updateStatus();
         }
         locPool.length = 0;
+
+        // cc.gg_transform_time = Date.now() - t;
     },
 
     transformDirty: function () {
@@ -258,6 +263,7 @@ cc.rendererWebGL = {
     clearRenderCommands: function () {
         // Copy previous command list for late check in rendering
         this._renderCmds.length = 0;
+        this._layerRenderCmds = {};
     },
 
     clear: function () {
@@ -266,22 +272,40 @@ cc.rendererWebGL = {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     },
 
-    setDepthTest: function (enable){
+    setDepthTest: function (enable) {
         var gl = cc._renderContext;
-        if(enable){
+        if (enable) {
             gl.clearDepth(1.0);
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LEQUAL);
         }
-        else{
+        else {
             gl.disable(gl.DEPTH_TEST);
         }
     },
-    
-    pushRenderCommand: function (cmd) {
-        if(!cmd.rendering && !cmd.uploadData)
+
+    pushRenderCommand: function (cmd, layer) {
+
+        if (layer && layer > 0) {
+            // console.log("layer render cmds 111", cmd.rendering, cmd.uploadData, cmd);
+        }
+
+        if (!cmd.rendering && !cmd.uploadData)
             return;
-        if (this._isCacheToBufferOn) {
+
+        if (layer && layer > 0 && window.layerRender) {
+            if (this._isCacheToBufferOn) {
+                throw "没有处理此逻辑！";
+            }
+            // console.log("layer render cmds:", layer);
+            let cmds = this._layerRenderCmds[layer];
+            if (!cmds) {
+                this._layerRenderCmds[layer] = [];
+                cmds = this._layerRenderCmds[layer];
+            }
+            cmds.push(cmd);
+        }
+        else if (this._isCacheToBufferOn) {
             var currentId = this._currentID, locCmdBuffer = this._cacheToBufferCmds;
             var cmdList = locCmdBuffer[currentId];
             if (cmdList.indexOf(cmd) === -1)
@@ -295,36 +319,36 @@ cc.rendererWebGL = {
         vertexType = vertexType || VertexType.QUAD;
         var i, curr;
         switch (vertexType) {
-        case VertexType.QUAD:
-            for (i = 0; i < increment; i += 4) {
-                curr = _batchingSize + i;
-                _indexData[_indexSize++] = curr + 0;
-                _indexData[_indexSize++] = curr + 1;
-                _indexData[_indexSize++] = curr + 2;
-                _indexData[_indexSize++] = curr + 1;
-                _indexData[_indexSize++] = curr + 2;
-                _indexData[_indexSize++] = curr + 3;
-            }
-            break;
-        case VertexType.TRIANGLE:
-            _pureQuad = false;
-            for (i = 0; i < increment; i += 3) {
-                curr = _batchingSize + i;
-                _indexData[_indexSize++] = curr + 0;
-                _indexData[_indexSize++] = curr + 1;
-                _indexData[_indexSize++] = curr + 2;
-            }
-            break;
-        case VertexType.CUSTOM:
-            // CUSTOM type increase the indices data
-            _pureQuad = false;
-            var len = indices.length;
-            for (i = 0; i < len; i++) {
-                _indexData[_indexSize++] = _batchingSize + indices[i];
-            }
-            break;
-        default:
-            return;
+            case VertexType.QUAD:
+                for (i = 0; i < increment; i += 4) {
+                    curr = _batchingSize + i;
+                    _indexData[_indexSize++] = curr + 0;
+                    _indexData[_indexSize++] = curr + 1;
+                    _indexData[_indexSize++] = curr + 2;
+                    _indexData[_indexSize++] = curr + 1;
+                    _indexData[_indexSize++] = curr + 2;
+                    _indexData[_indexSize++] = curr + 3;
+                }
+                break;
+            case VertexType.TRIANGLE:
+                _pureQuad = false;
+                for (i = 0; i < increment; i += 3) {
+                    curr = _batchingSize + i;
+                    _indexData[_indexSize++] = curr + 0;
+                    _indexData[_indexSize++] = curr + 1;
+                    _indexData[_indexSize++] = curr + 2;
+                }
+                break;
+            case VertexType.CUSTOM:
+                // CUSTOM type increase the indices data
+                _pureQuad = false;
+                var len = indices.length;
+                for (i = 0; i < len; i++) {
+                    _indexData[_indexSize++] = _batchingSize + indices[i];
+                }
+                break;
+            default:
+                return;
         }
         _batchingSize += increment;
     },
@@ -353,6 +377,10 @@ cc.rendererWebGL = {
         _batchBroken = true;
     },
 
+    _othercall: function () {
+        // console.log("xxxxxxxxxxxxxxxxxxxxxxx batch draw");
+    },
+
     _uploadBufferData: function (cmd) {
         if (_batchingSize >= _maxVertexSize) {
             this._batchRendering();
@@ -370,6 +398,7 @@ cc.rendererWebGL = {
             _batchedInfo.blendDst !== blendDst ||
             _batchedInfo.shader !== shader) {
             // Draw batched elements
+            this._othercall();
             this._batchRendering();
             // Update _batchedInfo
             _batchedInfo.texture = texture;
@@ -384,34 +413,34 @@ cc.rendererWebGL = {
         if (len > 0) {
             var i, curr, type = cmd.vertexType || VertexType.QUAD;
             switch (type) {
-            case VertexType.QUAD:
-                for (i = 0; i < len; i += 4) {
-                    curr = _batchingSize + i;
-                    _indexData[_indexSize++] = curr + 0;
-                    _indexData[_indexSize++] = curr + 1;
-                    _indexData[_indexSize++] = curr + 2;
-                    _indexData[_indexSize++] = curr + 1;
-                    _indexData[_indexSize++] = curr + 2;
-                    _indexData[_indexSize++] = curr + 3;
-                }
-                break;
-            case VertexType.TRIANGLE:
-                _pureQuad = false;
-                for (i = 0; i < len; i += 3) {
-                    curr = _batchingSize + i;
-                    _indexData[_indexSize++] = curr + 0;
-                    _indexData[_indexSize++] = curr + 1;
-                    _indexData[_indexSize++] = curr + 2;
-                }
-                break;
-            case VertexType.CUSTOM:
-                _pureQuad = false;
-                if (cmd.uploadIndexData) {
-                    _indexSize += cmd.uploadIndexData(_indexData, _indexSize, _batchingSize);
-                }
-                break;
-            default:
-                return;
+                case VertexType.QUAD:
+                    for (i = 0; i < len; i += 4) {
+                        curr = _batchingSize + i;
+                        _indexData[_indexSize++] = curr + 0;
+                        _indexData[_indexSize++] = curr + 1;
+                        _indexData[_indexSize++] = curr + 2;
+                        _indexData[_indexSize++] = curr + 1;
+                        _indexData[_indexSize++] = curr + 2;
+                        _indexData[_indexSize++] = curr + 3;
+                    }
+                    break;
+                case VertexType.TRIANGLE:
+                    _pureQuad = false;
+                    for (i = 0; i < len; i += 3) {
+                        curr = _batchingSize + i;
+                        _indexData[_indexSize++] = curr + 0;
+                        _indexData[_indexSize++] = curr + 1;
+                        _indexData[_indexSize++] = curr + 2;
+                    }
+                    break;
+                case VertexType.CUSTOM:
+                    _pureQuad = false;
+                    if (cmd.uploadIndexData) {
+                        _indexSize += cmd.uploadIndexData(_indexData, _indexSize, _batchingSize);
+                    }
+                    break;
+                default:
+                    return;
             }
             _batchingSize += len;
         }
@@ -490,14 +519,66 @@ cc.rendererWebGL = {
      * @param {WebGLRenderingContext} [ctx=cc._renderContext]
      */
     rendering: function (ctx, cmds) {
+        // var t = Date.now();
         var locCmds = cmds || this._renderCmds,
             i, len, cmd,
             context = ctx || cc._renderContext;
+        var idx, ik, j;
+        var key;
+        var keys = [];
+        var loccmds;
 
         // Reset buffer and texture for rendering
         context.bindBuffer(context.ARRAY_BUFFER, null);
         cc.gl.bindTexture2DN(0, null);
-        
+
+        // console.log("xxxxxxxxxxxxxxxxxxxxxxxx render", cmds);
+
+        if (!cmds) {
+
+            // 按自定义的层级绘制
+            // 先排序
+            for (key in this._layerRenderCmds) {
+
+                ik = parseInt(key);
+                idx = keys.length;
+                for (i = 0; i < keys.length; i++) {
+
+                    if (ik < parseInt(keys[i])) {
+                        idx = i;
+                        break;
+                    }
+
+                }
+                keys.splice(idx, 0, key);
+            }
+            // 再绘制
+            for (i = 0; i < keys.length; i++) {
+
+                loccmds = this._layerRenderCmds[keys[i]];
+
+                for (j = 0, len = loccmds.length; j < len; ++j) {
+                    cmd = loccmds[j];
+                    if (!cmd._needDraw) continue;
+
+                    if (cmd.uploadData) {
+                        this._uploadBufferData(cmd);
+                        // console.log("YYYYYYYYYYYYYYYYYYYYYYYYYYYYY 1");
+                    }
+                    else {
+                        if (_batchingSize > 0) {
+                            this._batchRendering();
+                            // console.log("YYYYYYYYYYYYYYYYYYYYYYYYYYYYY 2");
+                        }
+                        cmd.rendering(context);
+                        // console.log("YYYYYYYYYYYYYYYYYYYYYYYYYYYYY 3");
+                    }
+                }
+                this._batchRendering();
+            }
+        }
+
+
         for (i = 0, len = locCmds.length; i < len; ++i) {
             cmd = locCmds[i];
             if (!cmd._needDraw) continue;
@@ -513,6 +594,9 @@ cc.rendererWebGL = {
             }
         }
         this._batchRendering();
+
         _batchedInfo.texture = null;
+
+        // cc.gg_render_time = Date.now() - t;
     }
 };

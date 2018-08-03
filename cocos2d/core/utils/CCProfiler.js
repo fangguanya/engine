@@ -33,12 +33,12 @@ var stats = null;
 
 let _showFPS = false;
 
-function beforeUpdate () {
+function beforeUpdate() {
     stats('frame').start();
     stats('logic').start();
 }
 
-function afterVisit () {
+function afterVisit() {
     if (cc.director.isPaused()) {
         stats('frame').start();
     }
@@ -48,20 +48,21 @@ function afterVisit () {
     stats('render').start();
 }
 
-function afterDraw () {
+function afterDraw() {
     stats('render').end();
     stats('draws').value = cc.g_NumberOfDraws;
+    stats('tc').value = cc.g_tc;
     stats('frame').end();
     stats('fps').frame();
     stats().tick();
 }
 
 cc.profiler = module.exports = {
-    isShowingStats () {
+    isShowingStats() {
         return _showFPS;
     },
 
-    hideStats () {
+    hideStats() {
         if (_showFPS) {
             if (_fps.parentElement === document.body) {
                 document.body.removeChild(_fps);
@@ -73,7 +74,7 @@ cc.profiler = module.exports = {
         }
     },
 
-    showStats () {
+    showStats() {
         if (!_showFPS) {
             if (!stats) {
                 stats = PStats.new(_fps, {
@@ -82,6 +83,7 @@ cc.profiler = module.exports = {
                         frame: { desc: 'Frame time (ms)', min: 0, max: 50, average: 500 },
                         fps: { desc: 'Framerate (FPS)', below: 30, average: 500 },
                         draws: { desc: 'Draw call' },
+                        tc: { desc: 'transform count' },
                         logic: { desc: 'Game Logic (ms)', min: 0, max: 50, average: 500, color: '#080' },
                         render: { desc: 'Renderer (ms)', min: 0, max: 50, average: 500, color: '#f90' },
                         mode: { desc: cc._renderType === cc.game.RENDER_TYPE_WEBGL ? 'WebGL' : 'Canvas', min: 1 }

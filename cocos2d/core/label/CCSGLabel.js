@@ -28,7 +28,7 @@ var EventTarget = require("../event/event-target");
 var JS = require("../platform/js");
 
 
-var FontLetterDefinition = function() {
+var FontLetterDefinition = function () {
     this._u = 0;
     this._v = 0;
     this._width = 0;
@@ -40,7 +40,7 @@ var FontLetterDefinition = function() {
     this._xAdvance = 0;
 };
 
-cc.FontAtlas = function(fntConfig) {
+cc.FontAtlas = function (fntConfig) {
     this._lineHeight = fntConfig.commonHeight;
     this._fontSize = fntConfig.fontSize;
     this._letterDefinitions = {};
@@ -49,16 +49,16 @@ cc.FontAtlas = function(fntConfig) {
 
 cc.FontAtlas.prototype = {
     constructor: cc.FontAtlas,
-    setFontSize: function(fontSize) {
+    setFontSize: function (fontSize) {
         this._fontSize = fontSize;
     },
-    getOriginalFontSize: function() {
+    getOriginalFontSize: function () {
         return this._fntConfig.fontSize;
     },
-    addLetterDefinitions: function(letter, letterDefinition) {
+    addLetterDefinitions: function (letter, letterDefinition) {
         this._letterDefinitions[letter] = letterDefinition;
     },
-    cloneLetterDefinition: function() {
+    cloneLetterDefinition: function () {
         var copyLetterDefinitions = {};
         for (var key in this._letterDefinitions) {
             var value = new FontLetterDefinition();
@@ -67,14 +67,14 @@ cc.FontAtlas.prototype = {
         }
         return copyLetterDefinitions;
     },
-    assignLetterDefinitions: function(letterDefinition) {
+    assignLetterDefinitions: function (letterDefinition) {
         for (var key in this._letterDefinitions) {
             var newValue = letterDefinition[key];
             var oldValue = this._letterDefinitions[key];
             cc.js.mixin(oldValue, newValue);
         }
     },
-    scaleFontLetterDefinition: function(scaleFactor) {
+    scaleFontLetterDefinition: function (scaleFactor) {
         for (var fontDefinition in this._letterDefinitions) {
             var letterDefinitions = this._letterDefinitions[fontDefinition];
             letterDefinitions._width *= scaleFactor;
@@ -85,7 +85,7 @@ cc.FontAtlas.prototype = {
         }
     },
 
-    getLetterDefinitionForChar: function(char) {
+    getLetterDefinitionForChar: function (char) {
         var hasKey = this._letterDefinitions.hasOwnProperty(char.charCodeAt(0));
         var letterDefinition;
         if (hasKey) {
@@ -97,7 +97,7 @@ cc.FontAtlas.prototype = {
     }
 };
 
-var LetterInfo = function() {
+var LetterInfo = function () {
     this._char = '';
     this._valid = true;
     this._positionX = 0;
@@ -120,10 +120,10 @@ _ccsg.Label = _ccsg.Node.extend({
     _fontHandle: "", //a ttf font name or a bmfont file path.
     _lineSpacing: 0,
 
-    _maxLineWidth:  0,
-    _labelDimensions:  cc.size(0, 0),
-    _labelWidth:  0,
-    _labelHeight:  0,
+    _maxLineWidth: 0,
+    _labelDimensions: cc.size(0, 0),
+    _labelWidth: 0,
+    _labelHeight: 0,
 
     _lineHeight: 40,
     _outlined: false,
@@ -135,7 +135,7 @@ _ccsg.Label = _ccsg.Node.extend({
     _gradientDirection: 0,
     _className: "Label",
     //used for left and right margin
-    _margin : 0,
+    _margin: 0,
     //bold,italic, underline
     _isBold: false,
     _isItalic: false,
@@ -150,10 +150,10 @@ _ccsg.Label = _ccsg.Node.extend({
     },
 
     //fontHandle it is a system font name, ttf file path or bmfont file path.
-    ctor: function(string, fontAsset) {
+    ctor: function (string, fontAsset) {
         EventTarget.call(this);
         var isAsset = fontAsset instanceof cc.Font;
-        var fontHandle =  isAsset ? fontAsset.rawUrl : '';
+        var fontHandle = isAsset ? fontAsset.rawUrl : '';
 
         this._fontHandle = fontHandle;
         if (typeof string !== 'string') {
@@ -173,7 +173,7 @@ _ccsg.Label = _ccsg.Node.extend({
         this._linesWidth = [];
         this._linesOffsetX = [];
         this._horizontalKernings = [];
-        this._reusedRect =  cc.rect(0, 0, 0, 0);
+        this._reusedRect = cc.rect(0, 0, 0, 0);
         if (isAsset) {
             this.setFontAsset(fontAsset);
         } else {
@@ -182,23 +182,23 @@ _ccsg.Label = _ccsg.Node.extend({
         this.setString(this._string);
     },
 
-    _resetBMFont: function() {
+    _resetBMFont: function () {
         this._imageOffset.x = this._imageOffset.y = 0;
         this._cascadeColorEnabled = true;
         this._cascadeOpacityEnabled = true;
         this._fontAtlas = null;
         this._config = null;
-        this._numberOfLines =  0;
+        this._numberOfLines = 0;
         this._lettersInfo.length = 0;
         this._linesWidth.length = 0;
         this._linesOffsetX.length = 0;
-        this._textDesiredHeight =  0;
-        this._letterOffsetY =  0;
-        this._tailoredTopY =  0;
-        this._tailoredBottomY =  0;
-        this._bmfontScale =  1.0;
+        this._textDesiredHeight = 0;
+        this._letterOffsetY = 0;
+        this._tailoredTopY = 0;
+        this._tailoredBottomY = 0;
+        this._bmfontScale = 1.0;
         this._horizontalKernings.length = 0;
-        this._lineBreakWithoutSpaces =  false;
+        this._lineBreakWithoutSpaces = false;
 
         this._reusedRect.x = this._reusedRect.y = this._reusedRect.width = this._reusedRect.height = 0;
         this._textureLoaded = false;
@@ -209,29 +209,29 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    setHorizontalAlign: function(align) {
+    setHorizontalAlign: function (align) {
         if (this._hAlign === align) return;
 
         this._hAlign = align;
         this._notifyLabelSkinDirty();
     },
 
-    getHorizontalAlign: function() {
+    getHorizontalAlign: function () {
         return this._hAlign;
     },
 
-    setVerticalAlign: function(align) {
+    setVerticalAlign: function (align) {
         if (this._vAlign === align) return;
 
         this._vAlign = align;
         this._notifyLabelSkinDirty();
     },
 
-    getVerticalAlign: function() {
+    getVerticalAlign: function () {
         return this._vAlign;
     },
 
-    setString: function(string) {
+    setString: function (string) {
         //convert param to string
         if (typeof string !== 'string') {
             string = '' + string;
@@ -243,26 +243,26 @@ _ccsg.Label = _ccsg.Node.extend({
         this._notifyLabelSkinDirty();
     },
 
-    setMargin: function(value) {
-        if(this._margin === value) return;
+    setMargin: function (value) {
+        if (this._margin === value) return;
 
         this._margin = value;
         this._notifyLabelSkinDirty();
     },
 
-    getString: function() {
+    getString: function () {
         return this._string;
     },
-    getStringLength: function() {
+    getStringLength: function () {
         return this._string.length;
     },
 
-    enableWrapText: function(enabled) {
+    enableWrapText: function (enabled) {
         if (this._isWrapText === enabled) return;
 
         //when label is in resize mode, wrap is disabled.
         if (this._overFlow === _ccsg.Label.Overflow.RESIZE_HEIGHT ||
-           this._overFlow === _ccsg.Label.Overflow.NONE) {
+            this._overFlow === _ccsg.Label.Overflow.NONE) {
             return;
         }
         this._isWrapText = enabled;
@@ -273,7 +273,7 @@ _ccsg.Label = _ccsg.Node.extend({
 
     enableItalics: function (enabled) {
         this._isItalic = enabled;
-        if(enabled) {
+        if (enabled) {
             this.setSkewX(12);
         } else {
             this.setSkewX(0);
@@ -281,50 +281,50 @@ _ccsg.Label = _ccsg.Node.extend({
     },
 
     enableBold: function (enabled) {
-        if(this._isBold === enabled) return;
+        if (this._isBold === enabled) return;
 
         this._isBold = enabled;
         this._notifyLabelSkinDirty();
     },
 
     enableUnderline: function (enabled) {
-        if(this._isUnderline === enabled) return;
+        if (this._isUnderline === enabled) return;
 
         this._isUnderline = enabled;
         this._notifyLabelSkinDirty();
     },
 
-    isWrapTextEnabled: function() {
+    isWrapTextEnabled: function () {
         return this._isWrapText;
     },
-    getFontName: function() {
+    getFontName: function () {
         return this._fontHandle;
     },
-    setFontSize: function(fntSize) {
-        if(this._fontSize === fntSize) return;
+    setFontSize: function (fntSize) {
+        if (this._fontSize === fntSize) return;
 
         this._fontSize = fntSize;
         this._drawFontsize = fntSize;
         this._notifyLabelSkinDirty();
     },
 
-    getFontSize: function() {
+    getFontSize: function () {
         return this._fontSize;
     },
 
-    isOutlined: function() {
+    isOutlined: function () {
         return this._outlined;
     },
 
-    setOutlined: function(value) {
-        if(this._outlined === value) return;
+    setOutlined: function (value) {
+        if (this._outlined === value) return;
 
         this._outlined = !!value;
         this._notifyLabelSkinDirty();
     },
 
-    setFillColorGradientEnabled: function(value) {
-        if(this._gradientEnabled === value) return;
+    setFillColorGradientEnabled: function (value) {
+        if (this._gradientEnabled === value) return;
 
         this._gradientEnabled = !!value;
         this._notifyLabelSkinDirty();
@@ -334,7 +334,7 @@ _ccsg.Label = _ccsg.Node.extend({
     },
 
     setGradientStartColor: function (value) {
-        if(this._gradientStartColor === value) return;
+        if (this._gradientStartColor === value) return;
         this._gradientStartColor = value;
         this._notifyLabelSkinDirty();
     },
@@ -344,7 +344,7 @@ _ccsg.Label = _ccsg.Node.extend({
     },
 
     setGradientEndColor: function (value) {
-        if(this._gradientEndColor === value) return;
+        if (this._gradientEndColor === value) return;
         this._gradientEndColor = value;
         this._notifyLabelSkinDirty();
     },
@@ -362,30 +362,30 @@ _ccsg.Label = _ccsg.Node.extend({
         return this._gradientDirection;
     },
 
-    getOutlineColor: function() {
+    getOutlineColor: function () {
         return this._outlineColor;
     },
 
-    setOutlineColor: function(value) {
-        if(this._outlineColor === value) return;
+    setOutlineColor: function (value) {
+        if (this._outlineColor === value) return;
 
         this._outlineColor = cc.color(value);
         this._notifyLabelSkinDirty();
     },
 
-    setOutlineWidth: function(value) {
-        if(this._outlineWidth === value) return;
+    setOutlineWidth: function (value) {
+        if (this._outlineWidth === value) return;
 
         this._outlineWidth = value;
         this._notifyLabelSkinDirty();
     },
 
-    getOutlineWidth: function() {
+    getOutlineWidth: function () {
         return this._outlineWidth;
     },
 
-    _updateWrapText: function(overflow){
-        if ( overflow === _ccsg.Label.Overflow.RESIZE_HEIGHT) {
+    _updateWrapText: function (overflow) {
+        if (overflow === _ccsg.Label.Overflow.RESIZE_HEIGHT) {
             this._isWrapText = true;
         }
 
@@ -398,7 +398,7 @@ _ccsg.Label = _ccsg.Node.extend({
     _setOverflowBMFont: function () {
         if (this._labelType === _ccsg.Label.Type.BMFont) {
 
-            if ( this._overFlow === _ccsg.Label.Overflow.RESIZE_HEIGHT) {
+            if (this._overFlow === _ccsg.Label.Overflow.RESIZE_HEIGHT) {
                 this._setDimensions(this._labelDimensions.width, 0);
             }
 
@@ -410,7 +410,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    setOverflow: function(overflow) {
+    setOverflow: function (overflow) {
         if (this._overFlow === overflow) return;
 
         this._overFlow = overflow;
@@ -422,38 +422,38 @@ _ccsg.Label = _ccsg.Node.extend({
         this._notifyLabelSkinDirty();
     },
 
-    getOverflow: function() {
+    getOverflow: function () {
         return this._overFlow;
     },
 
-    setSpacingX: function(spacing) {
+    setSpacingX: function (spacing) {
         if (this._spacingX === spacing) return;
         this._spacingX = spacing;
         this._notifyLabelSkinDirty();
     },
 
-    setLineHeight: function(lineHeight) {
+    setLineHeight: function (lineHeight) {
         if (this._lineHeight === lineHeight) return;
 
         this._lineHeight = lineHeight;
         this._notifyLabelSkinDirty();
     },
-    setLineBreakWithoutSpace: function(lineBreakFlag) {
+    setLineBreakWithoutSpace: function (lineBreakFlag) {
         if (this._lineBreakWithoutSpaces === lineBreakFlag) return;
 
         this._lineBreakWithoutSpaces = lineBreakFlag;
         this._notifyLabelSkinDirty();
     },
-    getSpacingX: function() {
+    getSpacingX: function () {
         return this._spacingX;
     },
 
-    getLineHeight: function() {
+    getLineHeight: function () {
         return this._lineHeight;
     },
 
-    getBMFontLineHeight : function() {
-        if(this._fontAtlas) {
+    getBMFontLineHeight: function () {
+        if (this._fontAtlas) {
             return this._fontAtlas._lineHeight;
         }
     },
@@ -468,14 +468,14 @@ _ccsg.Label = _ccsg.Node.extend({
         this.emit('load');
     },
 
-    setFontAsset: function(fontAsset) {
+    setFontAsset: function (fontAsset) {
         this._fontAsset = fontAsset;
         var isAsset = fontAsset instanceof cc.Font;
         if (!isAsset) {
             this.setFontFamily('');
             return;
         }
-        var fontHandle =  isAsset ? fontAsset.rawUrl : '';
+        var fontHandle = isAsset ? fontAsset.rawUrl : '';
         var extName = cc.path.extname(fontHandle);
 
         this._resetBMFont();
@@ -495,7 +495,7 @@ _ccsg.Label = _ccsg.Node.extend({
         this._notifyLabelSkinDirty();
     },
 
-    _loadTTFFont: function(fontHandle) {
+    _loadTTFFont: function (fontHandle) {
         var self = this;
         var callback = function () {
             self._notifyLabelSkinDirty();
@@ -504,7 +504,7 @@ _ccsg.Label = _ccsg.Node.extend({
 
         var fontFamilyName = "";
         if (CC_WECHATGAME) {
-            fontFamilyName = wx.loadFont(fontHandle);        
+            fontFamilyName = wx.loadFont(fontHandle);
             //avoid the error in wechat devtool platform
             if (!fontFamilyName) {
                 fontFamilyName = cc.CustomFontLoader._getFontFamily(fontHandle);
@@ -519,7 +519,7 @@ _ccsg.Label = _ccsg.Node.extend({
         return fontFamilyName;
     },
 
-    setContentSize: function(size, height) {
+    setContentSize: function (size, height) {
         if (this._overFlow === _ccsg.Label.Overflow.NONE) {
             return;
         }
@@ -527,7 +527,7 @@ _ccsg.Label = _ccsg.Node.extend({
         this._setDimensions(size, height);
     },
 
-    setBlendFunc: function(src, dst) {
+    setBlendFunc: function (src, dst) {
         var locBlendFunc = this._blendFunc;
         if (dst === undefined) {
             locBlendFunc.src = src.src;
@@ -539,11 +539,11 @@ _ccsg.Label = _ccsg.Node.extend({
     },
 
 
-    getBlendFunc: function() {
+    getBlendFunc: function () {
         return new cc.BlendFunc(this._blendFunc.src, this._blendFunc.dst);
     },
 
-    _setupBMFontOverflowMetrics: function(newWidth, newHeight) {
+    _setupBMFontOverflowMetrics: function (newWidth, newHeight) {
         if (this._overFlow === _ccsg.Label.Overflow.RESIZE_HEIGHT) {
             newHeight = 0;
         }
@@ -570,20 +570,20 @@ _ccsg.Label = _ccsg.Node.extend({
             this._updateContent();
             this.setColor(this.color);
         } else if (this._labelType === _ccsg.Label.Type.TTF
-                   || this._labelType === _ccsg.Label.Type.SystemFont) {
+            || this._labelType === _ccsg.Label.Type.SystemFont) {
             this._renderCmd._bakeLabel();
         }
     },
 
-    _notifyLabelSkinDirty: function() {
+    _notifyLabelSkinDirty: function () {
         if (CC_EDITOR) {
             this._updateLabel();
         } else {
             this._renderCmd.setDirtyFlag(_ccsg.Node._dirtyFlags.textDirty
-                                         |_ccsg.Node._dirtyFlags.contentDirty);
+                | _ccsg.Node._dirtyFlags.contentDirty);
         }
     },
-    _createRenderCmd: function() {
+    _createRenderCmd: function () {
         if (cc._renderType === cc.game.RENDER_TYPE_WEBGL) {
             return new _ccsg.Label.WebGLRenderCmd(this);
         } else {
@@ -591,7 +591,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    getContentSize: function() {
+    getContentSize: function () {
         var locFlag = this._renderCmd._dirtyFlag;
         if (locFlag & _ccsg.Node._dirtyFlags.textDirty) {
             this._updateLabel();
@@ -615,7 +615,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
         return _ccsg.Node.prototype._getHeight.call(this);
     },
-    _alignText: function() {
+    _alignText: function () {
         var ret = true;
 
         do {
@@ -653,18 +653,18 @@ _ccsg.Label = _ccsg.Node.extend({
         return ret;
     },
 
-    _isHorizontalClamped : function(px, lineIndex){
+    _isHorizontalClamped: function (px, lineIndex) {
         var wordWidth = this._linesWidth[lineIndex];
         var letterOverClamp = (px > this._contentSize.width || px < 0);
 
-        if(!this._isWrapText){
+        if (!this._isWrapText) {
             return letterOverClamp;
-        }else{
+        } else {
             return (wordWidth > this._contentSize.width && letterOverClamp);
         }
     },
 
-    _updateQuads: function() {
+    _updateQuads: function () {
         var ret = true;
 
         this._spriteBatchNode.removeAllChildren();
@@ -726,7 +726,7 @@ _ccsg.Label = _ccsg.Node.extend({
                     var trimmedTop = offset.y - (originalSize.height - rect.height) / 2;
 
 
-                    if(!isRotated) {
+                    if (!isRotated) {
                         this._reusedRect.x += (rect.x - trimmedLeft);
                         this._reusedRect.y += (rect.y + trimmedTop);
                     } else {
@@ -740,6 +740,9 @@ _ccsg.Label = _ccsg.Node.extend({
 
                     if (!fontChar) {
                         fontChar = new _ccsg.Sprite();
+                        if (this._parent) {
+                            fontChar.renderLayer = this._parent.renderLayer;
+                        }
                         fontChar.initWithTexture(locTexture, this._reusedRect, isRotated);
                         fontChar.setAnchorPoint(cc.p(0, 1));
                     } else {
@@ -761,13 +764,13 @@ _ccsg.Label = _ccsg.Node.extend({
         return ret;
     },
 
-    _updateLetterSpriteScale: function(sprite) {
+    _updateLetterSpriteScale: function (sprite) {
         if (this._labelType === _ccsg.Label.Type.BMFont && this._fontSize > 0) {
             sprite.setScale(this._bmfontScale);
         }
     },
 
-    _recordPlaceholderInfo: function(letterIndex, char) {
+    _recordPlaceholderInfo: function (letterIndex, char) {
         if (letterIndex >= this._lettersInfo.length) {
             var tmpInfo = new LetterInfo();
             this._lettersInfo.push(tmpInfo);
@@ -777,7 +780,7 @@ _ccsg.Label = _ccsg.Node.extend({
         this._lettersInfo[letterIndex]._valid = false;
     },
 
-    _recordLetterInfo: function(letterPosition, character, letterIndex, lineIndex) {
+    _recordLetterInfo: function (letterPosition, character, letterIndex, lineIndex) {
         if (letterIndex >= this._lettersInfo.length) {
             var tmpInfo = new LetterInfo();
             this._lettersInfo.push(tmpInfo);
@@ -791,7 +794,7 @@ _ccsg.Label = _ccsg.Node.extend({
         this._lettersInfo[letterIndex]._positionY = letterPosition.y;
     },
 
-    _setDimensions: function(size, height) {
+    _setDimensions: function (size, height) {
         var newWidth = (typeof size.width === 'number') ? size.width : size;
         var newHeight = (typeof size.height === 'number') ? size.height : height;
 
@@ -810,11 +813,11 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _restoreFontSize: function() {
+    _restoreFontSize: function () {
         this._fontSize = this._drawFontsize;
     },
 
-    _multilineTextWrap: function(nextTokenFunc) {
+    _multilineTextWrap: function (nextTokenFunc) {
         var textLen = this.getStringLength();
         var lineIndex = 0;
         var nextTokenX = 0;
@@ -951,15 +954,15 @@ _ccsg.Label = _ccsg.Node.extend({
         return true;
     },
 
-    _multilineTextWrapByWord: function() {
+    _multilineTextWrapByWord: function () {
         return this._multilineTextWrap(this._getFirstWordLen.bind(this));
     },
 
-    _multilineTextWrapByChar: function() {
+    _multilineTextWrapByChar: function () {
         return this._multilineTextWrap(this._getFirstCharLen.bind(this));
     },
 
-    _isVerticalClamp: function() {
+    _isVerticalClamp: function () {
         if (this._textDesiredHeight > this._contentSize.height) {
             return true;
         } else {
@@ -967,7 +970,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _isHorizontalClamp: function() {
+    _isHorizontalClamp: function () {
         var letterClamp = false;
 
         for (var ctr = 0; ctr < this.getStringLength(); ++ctr) {
@@ -978,13 +981,13 @@ _ccsg.Label = _ccsg.Node.extend({
                 var lineIndex = this._lettersInfo[ctr]._lineIndex;
                 if (this._labelWidth > 0) {
                     if (!this._isWrapText) {
-                        if(px > this._contentSize.width){
+                        if (px > this._contentSize.width) {
                             letterClamp = true;
                             break;
                         }
-                    }else{
+                    } else {
                         var wordWidth = this._linesWidth[lineIndex];
-                        if(wordWidth > this._contentSize.width && (px > this._contentSize.width || px < 0)){
+                        if (wordWidth > this._contentSize.width && (px > this._contentSize.width || px < 0)) {
                             letterClamp = true;
                             break;
                         }
@@ -996,7 +999,7 @@ _ccsg.Label = _ccsg.Node.extend({
         return letterClamp;
     },
 
-    _shrinkLabelToContentSize: function(lambda) {
+    _shrinkLabelToContentSize: function (lambda) {
         var fontSize = this.getFontSize();
 
         var i = 0;
@@ -1035,7 +1038,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _scaleFontSizeDown: function(fontSize) {
+    _scaleFontSizeDown: function (fontSize) {
         var shouldUpdateContent = true;
         if (this._labelType === _ccsg.Label.Type.BMFont) {
             if (!fontSize) {
@@ -1050,7 +1053,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _updateContent: function() {
+    _updateContent: function () {
         if (this._fontAtlas) {
             this._computeHorizontalKerningForText(this._string);
             this._alignText();
@@ -1058,7 +1061,7 @@ _ccsg.Label = _ccsg.Node.extend({
     },
 
 
-    _computeAlignmentOffset: function() {
+    _computeAlignmentOffset: function () {
         this._linesOffsetX = [];
         switch (this._hAlign) {
             case cc.TextAlignment.LEFT:
@@ -1067,12 +1070,12 @@ _ccsg.Label = _ccsg.Node.extend({
                 }
                 break;
             case cc.TextAlignment.CENTER:
-                this._linesWidth.forEach(function(lineWidth) {
+                this._linesWidth.forEach(function (lineWidth) {
                     this._linesOffsetX.push((this._contentSize.width - lineWidth) / 2);
                 }.bind(this));
                 break;
             case cc.TextAlignment.RIGHT:
-                this._linesWidth.forEach(function(lineWidth) {
+                this._linesWidth.forEach(function (lineWidth) {
                     this._linesOffsetX.push(this._contentSize.width - lineWidth);
                 }.bind(this));
                 break;
@@ -1095,11 +1098,11 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _getFirstCharLen: function() {
+    _getFirstCharLen: function () {
         return 1;
     },
 
-    _getFirstWordLen: function(text, startIndex, textLen) {
+    _getFirstWordLen: function (text, startIndex, textLen) {
         var character = text.charAt(startIndex);
         if (cc.TextUtils.isUnicodeCJK(character)
             || character === "\n"
@@ -1124,9 +1127,9 @@ _ccsg.Label = _ccsg.Node.extend({
             }
             letterX = nextLetterX + letterDef._offsetX * this._bmfontScale;
 
-            if(letterX + letterDef._width * this._bmfontScale > this._maxLineWidth
-               && !cc.TextUtils.isUnicodeSpace(character)
-               && this._maxLineWidth > 0) {
+            if (letterX + letterDef._width * this._bmfontScale > this._maxLineWidth
+                && !cc.TextUtils.isUnicodeSpace(character)
+                && this._maxLineWidth > 0) {
                 return len;
             }
             nextLetterX += letterDef._xAdvance * this._bmfontScale + this._spacingX;
@@ -1141,7 +1144,7 @@ _ccsg.Label = _ccsg.Node.extend({
         return len;
     },
 
-    _updateBMFontScale: function() {
+    _updateBMFontScale: function () {
         if (this._labelType === _ccsg.Label.Type.BMFont) {
             var originalFontSize = this._fontAtlas._fontSize;
             this._bmfontScale = this._fontSize / originalFontSize;
@@ -1151,7 +1154,7 @@ _ccsg.Label = _ccsg.Node.extend({
 
     },
 
-    _initBMFontWithString: function(str, fontAsset) {
+    _initBMFontWithString: function (str, fontAsset) {
         var self = this;
         if (self._config) {
             cc.logID(4002);
@@ -1161,7 +1164,7 @@ _ccsg.Label = _ccsg.Node.extend({
         this._setBMFontFile(fontAsset);
     },
 
-    _createSpriteBatchNode: function(texture) {
+    _createSpriteBatchNode: function (texture) {
 
         this._spriteBatchNode = new cc.SpriteBatchNode(texture, this._string.length);
         this._spriteBatchNode.setCascadeColorEnabled(true);
@@ -1172,14 +1175,14 @@ _ccsg.Label = _ccsg.Node.extend({
         this.setColor(this.color);
     },
     //this method is used as createFontAtlas
-    _createFontChars: function() {
+    _createFontChars: function () {
         if (!this._config) {
             return;
         }
 
         this._fontAtlas = new cc.FontAtlas(this._config);
 
-        if(!this._lineHeight){
+        if (!this._lineHeight) {
             this._lineHeight = this._fontAtlas._lineHeight;
         }
 
@@ -1206,10 +1209,10 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _rescaleWithOriginalFontSize: function() {
+    _rescaleWithOriginalFontSize: function () {
         var renderingFontSize = this.getFontSize();
         if (this._drawFontsize - renderingFontSize >= 1 && this._overFlow === _ccsg.Label.Overflow.SHRINK) {
-            if(this._labelType === _ccsg.Label.Type.BMFont) {
+            if (this._labelType === _ccsg.Label.Type.BMFont) {
                 this._scaleFontSizeDown(this._drawFontsize);
             } else {
                 this._fontSize = this._drawFontsize;
@@ -1217,7 +1220,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _computeHorizontalKerningForText: function() {
+    _computeHorizontalKerningForText: function () {
         var stringLen = this.getStringLength();
         var locKerningDict = this._config.kerningDict;
 
@@ -1234,7 +1237,7 @@ _ccsg.Label = _ccsg.Node.extend({
         }
     },
 
-    _setBMFontFile: function(fontAsset) {
+    _setBMFontFile: function (fontAsset) {
         if (fontAsset) {
             if (this._labelType === _ccsg.Label.Type.BMFont) {
                 var self = this;
@@ -1287,7 +1290,7 @@ _ccsg.Label.pool.get = function (string, fontAsset) {
     var label = this._get();
     if (label) {
         var isAsset = fontAsset instanceof cc.Font;
-        var fontHandle =  isAsset ? fontAsset.rawUrl : '';
+        var fontHandle = isAsset ? fontAsset.rawUrl : '';
         label._fontHandle = fontHandle;
         if (typeof string !== 'string') {
             string = '' + string;

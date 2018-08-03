@@ -37,16 +37,16 @@ cc.CustomRenderCmd.prototype.rendering = function (ctx, scaleX, scaleY) {
 
 var dirtyFlags = _ccsg.Node._dirtyFlags = {
     transformDirty: 1 << 0,
-    visibleDirty:   1 << 1,
-    colorDirty:     1 << 2,
-    opacityDirty:   1 << 3,
-    cacheDirty:     1 << 4,
-    orderDirty:     1 << 5,
-    textDirty:      1 << 6,
-    gradientDirty:  1 << 7,
-    textureDirty:   1 << 8,
-    contentDirty:   1 << 9,
-    cullingDirty:   1 << 10,
+    visibleDirty: 1 << 1,
+    colorDirty: 1 << 2,
+    opacityDirty: 1 << 3,
+    cacheDirty: 1 << 4,
+    orderDirty: 1 << 5,
+    textDirty: 1 << 6,
+    gradientDirty: 1 << 7,
+    textureDirty: 1 << 8,
+    contentDirty: 1 << 9,
+    cullingDirty: 1 << 10,
     COUNT: 9
 };
 cc.js.get(dirtyFlags, 'all', function () {
@@ -65,7 +65,7 @@ _ccsg.Node._requestDirtyFlag = function (key) {
 
 var ONE_DEGREE = Math.PI / 180;
 
-function walkChildTree (root, funcName) {
+function walkChildTree(root, funcName) {
     var index = 1;
     var children, child, curr, parentCmd, i, len;
     var stack = _ccsg.Node._performStacks[_ccsg.Node._performing];
@@ -114,11 +114,11 @@ _ccsg.Node.RenderCmd = function (renderable) {
     this._cascadeColorEnabledDirty = false;
     this._cascadeOpacityEnabledDirty = false;
 
-    this._transform = {a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0};
-    this._worldTransform = {a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0};
-    this._inverse = {a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0};
+    this._transform = { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 };
+    this._worldTransform = { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 };
+    this._inverse = { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 };
     this._transformUpdated = false;
-    
+
     cc.renderer.pushDirtyNode(this);
 };
 
@@ -127,53 +127,53 @@ _ccsg.Node.RenderCmd.prototype = {
 
     _ctor: _ccsg.Node.RenderCmd,
 
-    getAnchorPointInPoints: function(){
+    getAnchorPointInPoints: function () {
         return cc.p(this._anchorPointInPoints);
     },
 
-    getDisplayedColor: function(){
+    getDisplayedColor: function () {
         var tmpColor = this._displayedColor;
         return cc.color(tmpColor.r, tmpColor.g, tmpColor.b, tmpColor.a);
     },
 
-    getDisplayedOpacity: function(){
+    getDisplayedOpacity: function () {
         return this._displayedOpacity;
     },
 
-    setCascadeColorEnabledDirty: function(){
+    setCascadeColorEnabledDirty: function () {
         this._cascadeColorEnabledDirty = true;
         this.setDirtyFlag(dirtyFlags.colorDirty);
     },
 
-    setCascadeOpacityEnabledDirty:function(){
+    setCascadeOpacityEnabledDirty: function () {
         this._cascadeOpacityEnabledDirty = true;
         this.setDirtyFlag(dirtyFlags.opacityDirty);
     },
 
-    getParentToNodeTransform: function(){
+    getParentToNodeTransform: function () {
         if (this._dirtyFlag & dirtyFlags.transformDirty) {
             cc.affineTransformInvertOut(this.getNodeToParentTransform(), this._inverse);
         }
         return this._inverse;
     },
 
-    detachFromParent: function(){},
+    detachFromParent: function () { },
 
-    _updateAnchorPointInPoint: function() {
+    _updateAnchorPointInPoint: function () {
         var locAPP = this._anchorPointInPoints, locSize = this._node._contentSize, locAnchorPoint = this._node._anchorPoint;
         locAPP.x = locSize.width * locAnchorPoint.x;
         locAPP.y = locSize.height * locAnchorPoint.y;
         this.setDirtyFlag(dirtyFlags.transformDirty);
     },
 
-    setDirtyFlag: function(dirtyFlag){
+    setDirtyFlag: function (dirtyFlag) {
         if (this._dirtyFlag === 0 && dirtyFlag !== 0)
             cc.renderer.pushDirtyNode(this);
         this._dirtyFlag |= dirtyFlag;
     },
 
-    getParentRenderCmd: function(){
-        if(this._node && this._node._parent && this._node._parent._renderCmd)
+    getParentRenderCmd: function () {
+        if (this._node && this._node._parent && this._node._parent._renderCmd)
             return this._node._parent._renderCmd;
         return null;
     },
@@ -263,10 +263,10 @@ _ccsg.Node.RenderCmd.prototype = {
 
         // update world transform
         if (pt) {
-            wt.a  = t.a  * pt.a + t.b  * pt.c;
-            wt.b  = t.a  * pt.b + t.b  * pt.d;
-            wt.c  = t.c  * pt.a + t.d  * pt.c;
-            wt.d  = t.c  * pt.b + t.d  * pt.d;
+            wt.a = t.a * pt.a + t.b * pt.c;
+            wt.b = t.a * pt.b + t.b * pt.d;
+            wt.c = t.c * pt.a + t.d * pt.c;
+            wt.d = t.c * pt.b + t.d * pt.d;
             wt.tx = t.tx * pt.a + t.ty * pt.c + pt.tx;
             wt.ty = t.tx * pt.b + t.ty * pt.d + pt.ty;
         } else {
@@ -280,6 +280,19 @@ _ccsg.Node.RenderCmd.prototype = {
     },
 
     transform: function (parentCmd, recursive) {
+
+        if (window.gg_frame && cc.gg_frame && this.gg_frame === cc.gg_frame) {
+            return;
+        }
+        this.gg_frame = cc.gg_frame;
+        if (this.blockTransform) {
+            return;
+        }
+
+        if (window.gg_allcmds) {
+            cc.gg_allcmds.push(this);
+        }
+        cc.g_tc++;
         this.updateTransform(parentCmd);
 
         if (this._currentRegion) {
@@ -289,7 +302,7 @@ _ccsg.Node.RenderCmd.prototype = {
 
         if (cc.macro.ENABLE_CULLING) {
             this._updateCameraFlag(parentCmd);
-            
+
             if (this._doCulling) {
                 this._doCulling();
             }
@@ -305,13 +318,13 @@ _ccsg.Node.RenderCmd.prototype = {
 
     _updateCameraFlag: function (parentCmd) {
         var Camera = cc.Camera;
-        
+
         if (cc._renderType === cc.game.RENDER_TYPE_WEBGL && Camera) {
             if (parentCmd && this._cameraFlag != Camera.flags.InCamera) {
                 this._cameraFlag = parentCmd._cameraFlag > 0 ? Camera.flags.ParentInCamera : 0;
-            }    
+            }
         }
-        
+
     },
 
     culling: function (parentCmd, recursive) {
@@ -321,9 +334,9 @@ _ccsg.Node.RenderCmd.prototype = {
             }
             return;
         }
-        
+
         this._updateCameraFlag(parentCmd);
-        
+
         if (this._doCulling) {
             this._doCulling();
         }
@@ -340,7 +353,7 @@ _ccsg.Node.RenderCmd.prototype = {
         return this._transform;
     },
 
-    setNodeToParentTransform: function(transform) {
+    setNodeToParentTransform: function (transform) {
         if (transform) {
             // use specified transform
             this._transform = transform;
@@ -352,7 +365,7 @@ _ccsg.Node.RenderCmd.prototype = {
         this.setDirtyFlag(dirtyFlags.transformDirty);
     },
 
-    _propagateFlagsDown: function(parentCmd) {
+    _propagateFlagsDown: function (parentCmd) {
         if (!parentCmd) return;
 
         //return;
@@ -366,10 +379,10 @@ _ccsg.Node.RenderCmd.prototype = {
         //    But while the child element does not enter the circulation
         //    Here will be reset state in last
         //    In order the child elements get the parent state
-        if(parentNode._cascadeColorEnabled && (parentFlag & dirtyFlags.colorDirty))
+        if (parentNode._cascadeColorEnabled && (parentFlag & dirtyFlags.colorDirty))
             locFlag |= dirtyFlags.colorDirty;
 
-        if(parentNode._cascadeOpacityEnabled && (parentFlag & dirtyFlags.opacityDirty))
+        if (parentNode._cascadeOpacityEnabled && (parentFlag & dirtyFlags.opacityDirty))
             locFlag |= dirtyFlags.opacityDirty;
 
         if (parentFlag & dirtyFlags.transformDirty) {
@@ -431,7 +444,7 @@ _ccsg.Node.RenderCmd.prototype = {
                 selChildren = node._children;
                 for (i = 0, len = selChildren.length; i < len; i++) {
                     item = selChildren[i];
-                    if (item && item._renderCmd){
+                    if (item && item._renderCmd) {
                         item._renderCmd._updateDisplayColor(locDispColor);
                         item._renderCmd._updateColor();
                     }
@@ -466,7 +479,7 @@ _ccsg.Node.RenderCmd.prototype = {
                 selChildren = node._children;
                 for (i = 0, len = selChildren.length; i < len; i++) {
                     item = selChildren[i];
-                    if (item && item._renderCmd){
+                    if (item && item._renderCmd) {
                         item._renderCmd._updateDisplayOpacity(this._displayedOpacity);
                         item._renderCmd._updateColor();
                     }
@@ -476,7 +489,7 @@ _ccsg.Node.RenderCmd.prototype = {
         this._dirtyFlag &= ~dirtyFlags.opacityDirty;
     },
 
-    _syncDisplayColor : function (parentColor) {
+    _syncDisplayColor: function (parentColor) {
         var node = this._node, locDispColor = this._displayedColor, locRealColor = node._realColor;
         if (parentColor === undefined) {
             var locParent = node._parent;
@@ -490,7 +503,7 @@ _ccsg.Node.RenderCmd.prototype = {
         locDispColor.b = 0 | (locRealColor.b * parentColor.b / 255.0);
     },
 
-    _syncDisplayOpacity : function (parentOpacity) {
+    _syncDisplayOpacity: function (parentOpacity) {
         var node = this._node;
         if (parentOpacity === undefined) {
             var locParent = node._parent;
@@ -501,7 +514,7 @@ _ccsg.Node.RenderCmd.prototype = {
         this._displayedOpacity = node._realOpacity * parentOpacity / 255.0;
     },
 
-    _updateColor: function(){},
+    _updateColor: function () { },
 
     updateStatus: function () {
         var locFlag = this._dirtyFlag;
@@ -524,7 +537,7 @@ _ccsg.Node.RenderCmd.prototype = {
 
         if (locFlag & dirtyFlags.transformDirty) {
             var parentCmd = this.getParentRenderCmd();
-        
+
             //update the transform
             this.transform(parentCmd, true);
             this._dirtyFlag &= ~dirtyFlags.transformDirty;
