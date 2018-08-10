@@ -1556,10 +1556,10 @@ _ccsg.ParticleSystem = _ccsg.Node.extend({
         //     }
         //     return;
         // }
-        var t = Date.now();
-        cc.gg_particle_count++;
+        // var t = Date.now();
+        // cc.gg_particle_count++;
         this.updateImpl(dt);
-        cc.gg_particle_time += Date.now() - t;
+        // cc.gg_particle_time += Date.now() - t;
     },
 
     updateImpl: function (dt) {

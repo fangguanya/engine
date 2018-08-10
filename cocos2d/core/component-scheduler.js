@@ -43,9 +43,9 @@ var callStart = CC_SUPPORT_JIT ? 'c.start();c._objFlags|=' + IsStartCalled : fun
     c._objFlags |= IsStartCalled;
 };
 var callUpdate = CC_SUPPORT_JIT ? 'c.update(dt)' : function (c, dt) {
-    var t = Date.now()
+    // var t = Date.now()
     c.update(dt);
-    cc.gg_update_times.push({ n: c.name, t: Date.now() - t });
+    // cc.gg_update_times.push({ n: c.name, t: Date.now() - t });
 };
 var callLateUpdate = CC_SUPPORT_JIT ? 'c.lateUpdate(dt)' : function (c, dt) {
     c.lateUpdate(dt);

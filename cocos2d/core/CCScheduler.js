@@ -411,15 +411,15 @@ cc.Scheduler = cc._Class.extend({
                 entry.isUpdate ? entry.target.update(dt) : entry.callback.call(entry.target, dt);
         }
 
-        var t = Date.now();
+        // var t = Date.now();
         for (i = 0, list = this._updatesPosList, len = list.length; i < len; i++) {
             entry = list[i];
             if (!entry.paused && !entry.markedForDeletion)
                 entry.isUpdate ? entry.target.update(dt) : entry.callback.call(entry.target, dt);
         }
-        cc.sch1 = Date.now() - t;
+        // cc.sch1 = Date.now() - t;
 
-        var t = Date.now();
+        // var t = Date.now();
         // Iterate over all the custom selectors
         var elt, arr = this._arrayForTimers;
         for (i = 0; i < arr.length; i++) {
@@ -474,7 +474,7 @@ cc.Scheduler = cc._Class.extend({
             else
                 i++;
         }
-        cc.sch2 = Date.now() - t;
+        // cc.sch2 = Date.now() - t;
 
         this._updateHashLocked = false;
         this._currentTarget = null;

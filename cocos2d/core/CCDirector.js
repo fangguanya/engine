@@ -1487,8 +1487,8 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
         cc.gg_particle_time = 0;
         cc.sch1 = 0;
         cc.sch2 = 0;
-        var t = Date.now();
-        var t1;
+        // var t = Date.now();
+        // var t1;
         if (this._purgeDirectorInNextLoop) {
             this._purgeDirectorInNextLoop = false;
             this.purgeDirector();
@@ -1497,35 +1497,35 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
             // calculate "global" dt
             this.calculateDeltaTime();
 
-            t1 = Date.now();
+            // t1 = Date.now();
             if (!this._paused) {
                 this.emit(cc.Director.EVENT_BEFORE_UPDATE);
-                cc.gg_time_seg1 = Date.now() - t1;
-                t1 = Date.now();
+                // cc.gg_time_seg1 = Date.now() - t1;
+                // t1 = Date.now();
                 // Call start for new added components
                 this._compScheduler.startPhase();
-                cc.gg_time_seg2 = Date.now() - t1;
-                t1 = Date.now();
+                // cc.gg_time_seg2 = Date.now() - t1;
+                // t1 = Date.now();
                 // Update for components
                 this._compScheduler.updatePhase(this._deltaTime);
-                cc.gg_time_seg3 = Date.now() - t1;
-                t1 = Date.now();
+                // cc.gg_time_seg3 = Date.now() - t1;
+                // t1 = Date.now();
                 // Engine update with scheduler
                 this._scheduler.update(this._deltaTime);
-                cc.gg_time_seg4 = Date.now() - t1;
-                t1 = Date.now();
+                // cc.gg_time_seg4 = Date.now() - t1;
+                // t1 = Date.now();
                 // Late update for components
                 this._compScheduler.lateUpdatePhase(this._deltaTime);
-                cc.gg_time_seg5 = Date.now() - t1;
-                t1 = Date.now();
+                // cc.gg_time_seg5 = Date.now() - t1;
+                // t1 = Date.now();
                 // User can use this event to do things after update
                 this.emit(cc.Director.EVENT_AFTER_UPDATE);
-                cc.gg_time_seg6 = Date.now() - t1;
-                t1 = Date.now();
+                // cc.gg_time_seg6 = Date.now() - t1;
+                // t1 = Date.now();
                 // Destroy entities that have been removed recently
                 cc.Object._deferredDestroy();
-                cc.gg_time_seg7 = Date.now() - t1;
-                t1 = Date.now();
+                // cc.gg_time_seg7 = Date.now() - t1;
+                // t1 = Date.now();
             }
 
             /* to avoid flickr, nextScene MUST be here: after tick and before draw.
@@ -1551,9 +1551,9 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
             this._visitScene();
             this.emit(cc.Director.EVENT_AFTER_VISIT);
 
-            cc.gg_time_seg8 = Date.now() - t1;
+            // cc.gg_time_seg8 = Date.now() - t1;
 
-            t1 = Date.now();
+            // t1 = Date.now();
             // Render
             cc.g_NumberOfDraws = 0;
             cc.renderer.clear();
@@ -1563,7 +1563,7 @@ cc.DisplayLinkDirector = cc.Director.extend(/** @lends cc.Director# */{
 
             this.emit(cc.Director.EVENT_AFTER_DRAW);
             eventManager.frameUpdateListeners();
-            cc.gg_time_seg9 = Date.now() - t1;
+            // cc.gg_time_seg9 = Date.now() - t1;
         }
         // cc.gg_totaltime = Date.now() - t;
     },
