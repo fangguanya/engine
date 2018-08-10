@@ -101,7 +101,7 @@ var properties = {
         editorOnly: true,
         notify: CC_EDITOR && function () {
             this._sgNode.resetSystem();
-            if ( !this.preview ) {
+            if (!this.preview) {
                 this._sgNode.stopSystem();
             }
             cc.engine.repaintInEditMode();
@@ -136,7 +136,7 @@ var properties = {
                 }
                 if (CC_EDITOR) {
                     cc.engine.repaintInEditMode();
-                //    self.preview = self.preview;
+                    //    self.preview = self.preview;
                 }
             }
         },
@@ -193,7 +193,7 @@ var properties = {
         },
         set: function (value) {
             this._texture = value;
-            this._sgNode.texture = value ? cc.textureCache.addImage( value ) : null;
+            this._sgNode.texture = value ? cc.textureCache.addImage(value) : null;
             if (!value && this._file) {
                 // fallback to plist
                 this._applyFile();
@@ -225,18 +225,18 @@ var properties = {
      * @property srcBlendFactor
      * @type {BlendFactor}
      */
-    _srcBlendFactor : BlendFactor.SRC_ALPHA,
+    _srcBlendFactor: BlendFactor.SRC_ALPHA,
     srcBlendFactor: {
-        get: function() {
+        get: function () {
             return this._srcBlendFactor;
         },
-        set: function(value) {
+        set: function (value) {
             this._srcBlendFactor = value;
             this._blendFunc.src = value;
             this._sgNode.setBlendFunc(this._blendFunc);
         },
         animatable: false,
-        type:BlendFactor,
+        type: BlendFactor,
         tooltip: CC_DEV && 'i18n:COMPONENT.particle_system.srcBlendFactor'
     },
 
@@ -246,12 +246,12 @@ var properties = {
      * @property dstBlendFactor
      * @type {BlendFactor}
      */
-    _dstBlendFactor : BlendFactor.ONE_MINUS_SRC_ALPHA,
+    _dstBlendFactor: BlendFactor.ONE_MINUS_SRC_ALPHA,
     dstBlendFactor: {
-        get: function() {
+        get: function () {
             return this._dstBlendFactor;
         },
-        set: function(value) {
+        set: function (value) {
             this._dstBlendFactor = value;
             this._blendFunc.dst = value;
             this._sgNode.setBlendFunc(this._blendFunc);
@@ -790,7 +790,9 @@ var ParticleSystem = cc.Class({
     // OVERRIDE METHODS
 
     _createSgNode: function () {
-        return new _ccsg.ParticleSystem();
+        var ps = new _ccsg.ParticleSystem();
+        ps.temp_parent = this;
+        return ps;
     },
 
     _initSgNode: function () {
