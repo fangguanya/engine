@@ -29,8 +29,8 @@ const js = require('./js');
 
 /**
  * Predefined constants
- * @enum macro
- * @type {Object}
+ * @class macro
+ * @static
  */
 cc.macro = {
     /**
@@ -345,6 +345,28 @@ cc.macro = {
     CLEANUP_IMAGE_CACHE: false,
 };
 
+
+let SUPPORT_TEXTURE_FORMATS = ['.webp', '.jpg', '.jpeg', '.bmp', '.png'];
+if (cc.sys.isMobile) {
+    if (cc.sys.os === cc.sys.OS_IOS) {
+        SUPPORT_TEXTURE_FORMATS = ['.pvr'].concat(SUPPORT_TEXTURE_FORMATS);
+    }
+    // else if (cc.sys.os === cc.sys.OS_ANDROID) {
+    //     SUPPORT_TEXTURE_FORMATS = ['.etc'].join(SUPPORT_TEXTURE_FORMATS);
+    // }
+}
+
+/**
+ * !en
+ * The image format supported by the engine defaults, and the supported formats may differ in different build platforms and device types.
+ * Currently all platform and device support ['.webp', '.jpg', '.jpeg', '.bmp', '.png'], ios mobile platform 
+ * !zh
+ * 引擎默认支持的图片格式，支持的格式可能在不同的构建平台和设备类型上有所差别。
+ * 目前所有平台和设备支持的格式有 ['.webp', '.jpg', '.jpeg', '.bmp', '.png']. The iOS mobile platform also supports the PVR format。
+ * @property {[String]} SUPPORT_TEXTURE_FORMATS
+ */
+cc.macro.SUPPORT_TEXTURE_FORMATS = SUPPORT_TEXTURE_FORMATS;
+
 js.getset(cc.macro, 'ENABLE_3D', function () {
     return cc._polyfill3D.enabled;
 }, function (enabled) {
@@ -359,7 +381,7 @@ js.getset(cc.macro, 'ENABLE_3D', function () {
 /**
  * !#en Key map for keyboard event
  * !#zh 键盘事件的按键值
- * @enum KEY
+ * @enum macro.KEY
  * @example {@link cocos2d/core/platform/CCCommon/KEY.js}
  */
 cc.macro.KEY = {
@@ -1367,7 +1389,7 @@ cc.macro.KEY = {
 
 /**
  * Image formats
- * @enum ImageFormat
+ * @enum macro.ImageFormat
  */
 cc.macro.ImageFormat = cc.Enum({
     /**
@@ -1445,7 +1467,7 @@ cc.macro.ImageFormat = cc.Enum({
  * !#zh
  * 混合因子
  * 可参考: http://www.andersriggelsen.dk/glblendfunc.php
- * @enum BlendFactor
+ * @enum macro.BlendFactor
  */
 cc.macro.BlendFactor = cc.Enum({
     /**
@@ -1511,7 +1533,7 @@ cc.macro.BlendFactor = cc.Enum({
 });
 
 /**
- * @enum TextAlignment
+ * @enum macro.TextAlignment
  */
 cc.macro.TextAlignment = cc.Enum({
     /**

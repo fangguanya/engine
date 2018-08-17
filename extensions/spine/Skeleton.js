@@ -296,7 +296,10 @@ sp.Skeleton = cc.Class({
         debugSlots: {
             default: false,
             editorOnly: true,
-            tooltip: CC_DEV && 'i18n:COMPONENT.skeleton.debug_slots'
+            tooltip: CC_DEV && 'i18n:COMPONENT.skeleton.debug_slots',
+            notify () {
+                this._initDebugDraw();
+            }
         },
 
         /**
@@ -308,7 +311,10 @@ sp.Skeleton = cc.Class({
         debugBones: {
             default: false,
             editorOnly: true,
-            tooltip: CC_DEV && 'i18n:COMPONENT.skeleton.debug_bones'
+            tooltip: CC_DEV && 'i18n:COMPONENT.skeleton.debug_bones',
+            notify () {
+                this._initDebugDraw();
+            }
         }
     },
 
@@ -320,8 +326,10 @@ sp.Skeleton = cc.Class({
         this._boundingBox = cc.rect();
         this._material = new SpriteMaterial();
         this._renderDatas = [];
-        this._debugNode = new Node();
-        this._debugRenderer = this._debugNode.addComponent(Graphics);
+
+        if (CC_DEBUG) {
+            this._debugRenderer = null;
+        }
     },
 
     /**
@@ -375,21 +383,31 @@ sp.Skeleton = cc.Class({
         this._updateSkeletonData();
     },
 
+    update (dt) {
+        if (CC_EDITOR) return;
+        let skeleton = this._skeleton;
+        let state = this._state;
+        if (skeleton) {
+            skeleton.update(dt);
+            if (state) {
+                dt *= this.timeScale;
+                state.update(dt);
+                state.apply(skeleton);
+            }
+        }
+    },
+
     onRestore () {
         // Destroyed and restored in Editor
         if (!this._material) {
             this._boundingBox = cc.rect();
             this._material = new SpriteMaterial();
             this._renderDatas = [];
-            this._debugNode = new Node();
-            this._debugRenderer = this._debugNode.addComponent(Graphics);
         }
     },
 
     onDestroy () {
         this._super();
-        this._debugNode.destroy();
-        this._debugRenderer.clear();
         // Render datas will be destroyed automatically by RenderComponent.onDestroy
         this._renderDatas.length = 0;
     },
@@ -586,20 +604,7 @@ sp.Skeleton = cc.Class({
      */
     setMix (fromAnimation, toAnimation, duration) {
         if (this._state) {
-            this._state.data.setMixWith(fromAnimation, toAnimation, duration);
-        }
-    },
-
-    /**
-     * !#en Sets event listener.
-     * !#zh 设置动画事件监听器。
-     * @method setAnimationListener
-     * @param {Object} target
-     * @param {Function} callback
-     */
-    setAnimationListener (target, callback) {
-        if (this._skeleton) {
-            this._skeleton.setAnimationListener(target, callback);
+            this._state.data.setMix(fromAnimation, toAnimation, duration);
         }
     },
 
@@ -624,7 +629,7 @@ sp.Skeleton = cc.Class({
             var res = this._state.setAnimationWith(trackIndex, animation, loop);
             if (CC_EDITOR && !cc.engine.isPlaying) {
                 this._state.update(0);
-                this._state.clearTracks();
+                this._state.apply(this._skeleton);
             }
             return res;
         }
@@ -779,8 +784,8 @@ sp.Skeleton = cc.Class({
     },
 
     /**
-     * !#en Set the start event listener for specified TrackEntry (only supported on Web).
-     * !#zh 用来为指定的 TrackEntry 设置动画开始播放的事件监听。（只支持 Web 平台）
+     * !#en Set the start event listener for specified TrackEntry.
+     * !#zh 用来为指定的 TrackEntry 设置动画开始播放的事件监听。
      * @method setTrackStartListener
      * @param {sp.spine.TrackEntry} entry
      * @param {function} listener
@@ -790,8 +795,8 @@ sp.Skeleton = cc.Class({
     },
 
     /**
-     * !#en Set the interrupt event listener for specified TrackEntry (only supported on Web).
-     * !#zh 用来为指定的 TrackEntry 设置动画被打断的事件监听。（只支持 Web 平台）
+     * !#en Set the interrupt event listener for specified TrackEntry.
+     * !#zh 用来为指定的 TrackEntry 设置动画被打断的事件监听。
      * @method setTrackInterruptListener
      * @param {sp.spine.TrackEntry} entry
      * @param {function} listener
@@ -801,8 +806,8 @@ sp.Skeleton = cc.Class({
     },
 
     /**
-     * !#en Set the end event listener for specified TrackEntry (only supported on Web).
-     * !#zh 用来为指定的 TrackEntry 设置动画播放结束的事件监听。（只支持 Web 平台）
+     * !#en Set the end event listener for specified TrackEntry.
+     * !#zh 用来为指定的 TrackEntry 设置动画播放结束的事件监听。
      * @method setTrackEndListener
      * @param {sp.spine.TrackEntry} entry
      * @param {function} listener
@@ -812,8 +817,8 @@ sp.Skeleton = cc.Class({
     },
 
     /**
-     * !#en Set the dispose event listener for specified TrackEntry (only supported on Web).
-     * !#zh 用来为指定的 TrackEntry 设置动画即将被销毁的事件监听。（只支持 Web 平台）
+     * !#en Set the dispose event listener for specified TrackEntry.
+     * !#zh 用来为指定的 TrackEntry 设置动画即将被销毁的事件监听。
      * @method setTrackDisposeListener
      * @param {sp.spine.TrackEntry} entry
      * @param {function} listener
@@ -823,8 +828,8 @@ sp.Skeleton = cc.Class({
     },
 
     /**
-     * !#en Set the complete event listener for specified TrackEntry (only supported on Web).
-     * !#zh 用来为指定的 TrackEntry 设置动画一次循环播放结束的事件监听。（只支持 Web 平台）
+     * !#en Set the complete event listener for specified TrackEntry.
+     * !#zh 用来为指定的 TrackEntry 设置动画一次循环播放结束的事件监听。
      * @method setTrackCompleteListener
      * @param {sp.spine.TrackEntry} entry
      * @param {function} listener
@@ -839,8 +844,8 @@ sp.Skeleton = cc.Class({
     },
 
     /**
-     * !#en Set the event listener for specified TrackEntry (only supported on Web).
-     * !#zh 用来为指定的 TrackEntry 设置动画帧事件的监听。（只支持 Web 平台）
+     * !#en Set the event listener for specified TrackEntry.
+     * !#zh 用来为指定的 TrackEntry 设置动画帧事件的监听。
      * @method setTrackEventListener
      * @param {sp.spine.TrackEntry} entry
      * @param {function} listener
@@ -911,7 +916,26 @@ sp.Skeleton = cc.Class({
         this._updateAnimEnum();
         this._updateSkinEnum();
         Editor.Utils.refreshSelectedInspector('node', this.node.uuid);
-    }
+    },
+
+    _initDebugDraw: CC_DEBUG && function () {
+        if (this.debugBones || this.debugSlots) {
+            if (!this._debugRenderer) {
+                let debugDrawNode = new cc.PrivateNode();
+                debugDrawNode.name = 'DEBUG_DRAW_NODE';
+                let debugDraw = debugDrawNode.addComponent(Graphics);
+                debugDraw.lineWidth = 1;
+                debugDraw.strokeColor = cc.color(255, 0, 0, 255);
+                
+                this._debugRenderer = debugDraw;
+            }
+
+            this._debugRenderer.node.parent = this.node;
+        }
+        else if (this._debugRenderer) {
+            this._debugRenderer.node.parent = null;
+        }
+    },
 });
 
 module.exports = sp.Skeleton;

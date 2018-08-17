@@ -602,7 +602,6 @@ cc.js.mixin(View.prototype, {
         cc.game.frame.style.width = width + "px";
         cc.game.frame.style.height = height + "px";
         this._resizeEvent();
-        cc.director.setProjection(cc.director.getProjection());
     },
 
     /**
@@ -756,10 +755,10 @@ cc.js.mixin(View.prototype, {
             vp.width = rv.width;
             vp.height = rv.height;
 
-            vb.x = -vp.x / this._scaleX;
-            vb.y = -vp.y / this._scaleY;
-            vb.width = cc.game.canvas.width / this._scaleX;
-            vb.height = cc.game.canvas.height / this._scaleY;
+            vb.x = 0;
+            vb.y = 0;
+            vb.width = rv.width / this._scaleX;
+            vb.height = rv.height / this._scaleY;
         }
 
         policy.postApply(this);
@@ -1077,16 +1076,6 @@ cc.ContainerStrategy = cc.Class({
         // Setup canvas
         locCanvas.width = w * devicePixelRatio;
         locCanvas.height = h * devicePixelRatio;
-
-        // set sharedCanvas size
-        if (cc.sys.browserType === cc.sys.BROWSER_TYPE_WECHAT_GAME && wx.getOpenDataContext) {
-            var openDataContext = wx.getOpenDataContext();
-            var sharedCanvas = openDataContext.canvas;
-            if (sharedCanvas) {
-                sharedCanvas.width = locCanvas.width;
-                sharedCanvas.height = locCanvas.height;
-            }
-        }
     },
 
     _fixContainer: function () {
@@ -1122,8 +1111,21 @@ cc.ContentStrategy = cc.Class({
         };
     },
 
-    _buildResult: function (contentW, contentH, scaleX, scaleY) {
-        var viewport = cc.rect(0, 0, contentW, contentH);
+    _buildResult: function (containerW, containerH, contentW, contentH, scaleX, scaleY) {
+        // Makes content fit better the canvas
+        Math.abs(containerW - contentW) < 2 && (contentW = containerW);
+        Math.abs(containerH - contentH) < 2 && (contentH = containerH);
+
+        var viewport = cc.rect(Math.round((containerW - contentW) / 2),
+                               Math.round((containerH - contentH) / 2),
+                               contentW, contentH);
+
+        // Translate the content
+        if (cc.game.renderType === cc.game.RENDER_TYPE_CANVAS){
+            //TODO: modify something for setTransform
+            //cc.game._renderContext.translate(viewport.x, viewport.y + contentH);
+        }
+
         this._result.scale = [scaleX, scaleY];
         this._result.viewport = viewport;
         return this._result;
@@ -1293,7 +1295,7 @@ cc.ContentStrategy = cc.Class({
             var containerW = cc.game.canvas.width, containerH = cc.game.canvas.height,
                 scaleX = containerW / designedResolution.width, scaleY = containerH / designedResolution.height;
 
-            return this._buildResult(containerW, containerH, scaleX, scaleY);
+            return this._buildResult(containerW, containerH, containerW, containerH, scaleX, scaleY);
         }
     });
 
@@ -1309,7 +1311,7 @@ cc.ContentStrategy = cc.Class({
             scaleX < scaleY ? (scale = scaleX, contentW = containerW, contentH = designH * scale)
                 : (scale = scaleY, contentW = designW * scale, contentH = containerH);
 
-            return this._buildResult(contentW, contentH, scale, scale);
+            return this._buildResult(containerW, containerH, contentW, contentH, scale, scale);
         }
     });
 
@@ -1325,7 +1327,7 @@ cc.ContentStrategy = cc.Class({
             scaleX < scaleY ? (scale = scaleY, contentW = designW * scale, contentH = containerH)
                 : (scale = scaleX, contentW = containerW, contentH = designH * scale);
 
-            return this._buildResult(contentW, contentH, scale, scale);
+            return this._buildResult(containerW, containerH, contentW, contentH, scale, scale);
         }
     });
 
@@ -1337,7 +1339,7 @@ cc.ContentStrategy = cc.Class({
                 designH = designedResolution.height, scale = containerH / designH,
                 contentW = containerW, contentH = containerH;
 
-            return this._buildResult(contentW, contentH, scale, scale);
+            return this._buildResult(containerW, containerH, contentW, contentH, scale, scale);
         }
     });
 
@@ -1349,7 +1351,7 @@ cc.ContentStrategy = cc.Class({
                 designW = designedResolution.width, scale = containerW / designW,
                 contentW = containerW, contentH = containerH;
 
-            return this._buildResult(contentW, contentH, scale, scale);
+            return this._buildResult(containerW, containerH, contentW, contentH, scale, scale);
         }
     });
 

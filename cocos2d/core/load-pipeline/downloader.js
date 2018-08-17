@@ -44,12 +44,6 @@ else {
 }
 
 function downloadScript (item, callback, isAsync) {
-    if (sys.platform === sys.WECHAT_GAME) {
-        require(item.url);
-        callback(null, item.url);
-        return;
-    }
-
     var url = item.url,
         d = document,
         s = document.createElement('script');
@@ -216,6 +210,8 @@ var defaultMap = {
     'tiff' : downloadImage,
     'webp' : downloadWebp,
     'image' : downloadImage,
+    'pvr': downloadBinary,
+    'etc': downloadBinary,
 
     // Audio
     'mp3' : downloadAudio,

@@ -444,7 +444,7 @@ var Sprite = cc.Class({
         }
         
         this._updateAssembler();
-        this._renderData.uvDirty = true;
+        this.markForUpdateRenderData(true);
 
         this.node.on(NodeEvent.SIZE_CHANGED, this._onNodeSizeDirty, this);
         this.node.on(NodeEvent.ANCHOR_CHANGED, this._onNodeSizeDirty, this);
@@ -539,7 +539,13 @@ var Sprite = cc.Class({
     },
 
     _canRender () {
-        if (!this._enabled || !this._material) return false;
+        if (cc.game.renderType === cc.game.RENDER_TYPE_CANVAS) {
+            if (!this._enabled) return false;
+        }
+        else {
+            if (!this._enabled || !this._material) return false;
+        }
+
         let spriteFrame = this._spriteFrame;
         if (!spriteFrame || !spriteFrame.textureLoaded()) {
             return false;

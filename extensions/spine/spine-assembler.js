@@ -23,7 +23,6 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-const js = require('../../cocos2d/core/platform/js');
 const Skeleton = require('./Skeleton');
 const spine = require('./lib/spine');
 const renderer = require('../../cocos2d/core/renderer');
@@ -102,7 +101,6 @@ var spineAssembler = {
         // get the vertex data
         let vertices = attachment.updateWorldVertices(slot, premultipliedAlpha);
         let vertexCount = vertices.length / 8;
-        let graphics = comp._debugRenderer;
         // augment render data size to ensure capacity
         renderData.dataLength += vertexCount;
         let data = renderData._data;
@@ -126,7 +124,9 @@ var spineAssembler = {
             dataOffset++;
         }
 
-        if (comp.debugSlots && vertexCount === 4) {
+        if (CC_DEBUG && comp.debugSlots && vertexCount === 4) {
+            let graphics = comp._debugRenderer;
+            
             // Debug Slot
             let VERTEX = spine.RegionAttachment;
             graphics.strokeColor = _slotColor;
@@ -147,11 +147,11 @@ var spineAssembler = {
         let premultiAlpha = comp.premultipliedAlpha;
         let graphics = comp._debugRenderer;
 
-        if (comp.debugBones || comp.debugSlots) {
+        if (CC_DEBUG && comp.debugBones || comp.debugSlots) {
             graphics.clear();
         }
 
-        let attachment, slot;
+        let attachment, slot, isMesh, isRegion;
         let dataId = 0, datas = comp._renderDatas, data = datas[dataId], newData = false;
         if (!data) {
             data = datas[dataId] = comp.requestRenderData();
@@ -166,14 +166,16 @@ var spineAssembler = {
             if (!slot.attachment)
                 continue;
             attachment = slot.attachment;
+            isMesh = (attachment instanceof spine.MeshAttachment);
+            isRegion = (attachment instanceof spine.RegionAttachment);
 
             // get the vertices length
             vertexCount = 0;
-            if (attachment instanceof spine.RegionAttachment) {
+            if (isRegion) {
                 vertexCount = 4;
                 indiceCount = 6;
             }
-            else if (attachment instanceof spine.MeshAttachment) {
+            else if (isMesh) {
                 vertexCount = attachment.regionUVs.length / 2;
                 indiceCount = attachment.triangles.length;
             }
@@ -211,7 +213,8 @@ var spineAssembler = {
                 data.indiceCount = indiceOffset;
                 // gen new data
                 dataId++;
-                if (!datas[dataId]) {
+                data = datas[dataId];
+                if (!data) {
                     data = datas[dataId] = comp.requestRenderData();
                 }
                 data.dataLength = vertexCount;
@@ -223,7 +226,7 @@ var spineAssembler = {
 
             // Fill up indices
             indices = data._indices;
-            if (attachment instanceof spine.RegionAttachment) {
+            if (isRegion) {
                 indices[indiceOffset] = vertexOffset;
                 indices[indiceOffset + 1] = vertexOffset + 1;
                 indices[indiceOffset + 2] = vertexOffset + 2;
@@ -251,7 +254,7 @@ var spineAssembler = {
             datas.length = dataId;
         }
 
-        if (comp.debugBones) {
+        if (CC_DEBUG && comp.debugBones) {
             let bone;
             graphics.lineWidth = 5;
             graphics.strokeColor = _boneColor;
@@ -275,29 +278,11 @@ var spineAssembler = {
                 }
             }
         }
-
-        if (comp.debugBones || comp.debugSlots) {
-            let renderDatas = graphics._impl._renderDatas;
-            for (let i = 0; i < renderDatas.length; i++) {
-                renderDatas[i].material = _debugMaterial;
-                datas.push(renderDatas[i]);
-            }
-        }
     },
 
     updateRenderData (comp, batchData) {
         let skeleton = comp._skeleton;
-        let state = comp._state;
         if (skeleton) {
-            let dt = cc.director.getDeltaTime();
-            skeleton.update(dt);
-
-            if (state) {
-                dt *= comp.timeScale;
-                state.update(dt);
-                state.apply(skeleton);
-            }
-
             skeleton.updateWorldTransform();
             this.genRenderDatas(comp, batchData);
         }
