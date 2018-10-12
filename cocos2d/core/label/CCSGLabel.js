@@ -1321,6 +1321,10 @@ _ccsg.Label.pool.get = function (string, fontAsset) {
         label.enableItalics(false);
         label.enableUnderline(false);
 
+        if (label._renderCmd["blockTransform"]) {
+            delete label._renderCmd["blockTransform"];
+        }
+
         return label;
     }
     else {
